@@ -16,21 +16,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
-    <!-- WebRTC & Tone -->
+    <!-- WebRTC, Tone.js & Push Notifications -->
+    <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.18.2.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-window.OneSignalDeferred = window.OneSignalDeferred || [];
-OneSignalDeferred.push(async function(OneSignal) {
-  await OneSignal.init({
-    appId: "79656dbc-1551-4e7f-9a59-f9829be8a319",
-    notifyButton: {
-      enable: true
-    }
-  });
-
-  OneSignal.showSlidedownPrompt(); // 👈 notification allow popup
-});
-</script>
+    
+    <!-- IMPORTANT: Make sure OneSignalSDKWorker.js is in your root directory! -->
+    <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({
+        appId: "79656dbc-1551-4e7f-9a59-f9829be8a319",
+        notifyButton: { enable: true },
+        allowLocalhostAsSecureOrigin: true
+      });
+      
+      // Attempt to request permission immediately upon initialization
+      if (OneSignal.Notifications && OneSignal.Notifications.permission !== "granted") {
+          OneSignal.Notifications.requestPermission();
+      }
+    });
+    </script>
 
     <style>
         /* ================= ULTRA-MODERN UI THEME ================= */
@@ -51,29 +57,12 @@ OneSignalDeferred.push(async function(OneSignal) {
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        body { 
-            background-color: #000; 
-            height: 100vh; 
-            width: 100vw;
-            overflow: hidden; 
-            color: var(--text-primary); 
-        }
+        body { background-color: #000; height: 100vh; width: 100vw; overflow: hidden; color: var(--text-primary); }
 
-        .brand-text {
-            font-size: 24px; font-weight: 700; letter-spacing: -0.5px;
-            background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
+        .brand-text { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
         /* FULL SCREEN APP WRAPPER */
-        #app-wrapper { 
-            width: 100%; 
-            height: 100%; 
-            background-color: var(--bg-base); 
-            position: relative; 
-            overflow: hidden; 
-            display: flex; 
-            flex-direction: column; 
-        }
+        #app-wrapper { width: 100%; height: 100%; background-color: var(--bg-base); position: relative; overflow: hidden; display: flex; flex-direction: column; }
 
         input, textarea { width: 100%; padding: 14px 16px; border-radius: 12px; background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-color); margin-bottom: 15px; font-size: 14px; transition: 0.3s; }
         input:focus, textarea:focus { border-color: var(--accent-color); outline: none; background: var(--bg-elevated); }
@@ -105,7 +94,6 @@ OneSignalDeferred.push(async function(OneSignal) {
         .toggle-password { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); font-size: 13px; font-weight: 600; cursor: pointer; user-select: none; }
         .developer-credit { text-align: center; font-size: 11px; color: var(--text-secondary); position: absolute; bottom: 30px; width: 100%; left: 0; }
 
-        /* Adjusted Header to keep menu button aligned right and removed title */
         .header { background: var(--bg-base); padding: 15px 20px; display: flex; justify-content: flex-end; align-items: center; z-index: 20; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
         .action-btn { background: transparent; color: var(--text-primary); width: auto; padding: 0; font-size: 26px; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; }
 
@@ -193,19 +181,26 @@ OneSignalDeferred.push(async function(OneSignal) {
         .comment-actions span { cursor: pointer; }
         .reply-thread { margin-left: 48px; margin-top: -5px;}
         #comment-input-container { padding: 15px; border-top: 1px solid var(--border-color); background: var(--bg-surface); padding-bottom: calc(15px + env(safe-area-inset-bottom)); }
-        .chat-input-area { display: flex; gap: 10px; align-items: center; }
-        .chat-input-area input { margin: 0; flex: 1; border-radius: 25px; padding: 12px 18px; background: var(--bg-base); }
-        .chat-input-area button { width: 45px; height: 45px; border-radius: 50%; padding: 0; display: flex; justify-content: center; align-items: center; background: var(--accent-color); }
 
         #chat-header { padding: 12px 15px; background: var(--bg-surface); justify-content: space-between; }
         #chat-header img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; }
         .chat-header-actions { display: flex; gap: 18px; margin-left: auto; }
         .chat-messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; background: var(--bg-base); }
-        .msg-bubble { max-width: 75%; padding: 12px 16px; border-radius: 20px; font-size: 14.5px; line-height: 1.4; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.2); user-select: none;}
+        
+        /* Message Bubble & Media Updates */
+        .msg-bubble { max-width: 75%; padding: 12px 16px; border-radius: 20px; font-size: 14.5px; line-height: 1.4; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.2); user-select: none; position: relative;}
+        .msg-bubble img, .msg-bubble video { max-width: 100%; border-radius: 12px; margin-bottom: 5px; display: block; }
         .msg-me { align-self: flex-end; background: var(--accent-color); color: #fff; border-bottom-right-radius: 4px; }
         .msg-other { align-self: flex-start; background: var(--bg-elevated); color: var(--text-primary); border-bottom-left-radius: 4px; }
         .msg-time { font-size: 10px; opacity: 0.7; margin-top: 5px; text-align: right; display: block; }
-        #chat-input-area { padding: 15px; background: var(--bg-surface); border-top: 1px solid var(--border-color); }
+        
+        #chat-input-wrapper { background: var(--bg-surface); border-top: 1px solid var(--border-color); padding-bottom: env(safe-area-inset-bottom); display: flex; flex-direction: column; width: 100%;}
+        #chat-media-preview-container { display: none; padding: 10px 15px; background: var(--bg-surface); border-bottom: 1px solid var(--border-color); justify-content: space-between; align-items: center; }
+        .chat-input-area { display: flex; gap: 10px; align-items: center; padding: 15px; }
+        .chat-input-area input[type="text"] { margin: 0; flex: 1; border-radius: 25px; padding: 12px 18px; background: var(--bg-base); }
+        .chat-input-area button { width: 45px; height: 45px; border-radius: 50%; padding: 0; display: flex; justify-content: center; align-items: center; background: var(--accent-color); }
+        .chat-attach-btn { background: transparent !important; color: var(--text-secondary) !important; padding: 0 !important; font-size: 26px !important; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; border-radius: 0 !important; width: auto !important; height: auto !important;}
+        .chat-attach-btn:active { transform: scale(0.9); }
 
         #user-profile-modal .modal-content { align-items: center; padding: 40px 20px; text-align: center; }
         .up-dp-large { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--bg-elevated); margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
@@ -243,9 +238,7 @@ OneSignalDeferred.push(async function(OneSignal) {
 <div id="app-wrapper">
     <!-- Auth Screen -->
     <div id="auth-screen" class="screen active">
-        <!-- Auth logo is kept, app title from inner header is removed below -->
         <div class="auth-logo brand-text">Whistachat</div>
-        
         <div style="background: var(--bg-glass); padding: 30px 20px; border-radius: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); width: 100%;">
             <form id="auth-form">
                 <input type="email" id="auth-email" placeholder="Email" required>
@@ -257,7 +250,6 @@ OneSignalDeferred.push(async function(OneSignal) {
             </form>
             <div class="toggle-auth" id="toggle-auth-btn">Don't have an account? Sign up</div>
         </div>
-
         <div class="developer-credit">Developed by Sana Kiran Desai</div>
     </div>
 
@@ -279,7 +271,6 @@ OneSignalDeferred.push(async function(OneSignal) {
     <!-- Main Application Screen -->
     <div id="main-screen" class="screen">
         <div class="header" id="main-header">
-            <!-- Removed text from here to meet requirement -->
             <button class="action-btn" id="open-menu-btn"><i class="ph ph-list"></i></button>
         </div>
 
@@ -428,14 +419,28 @@ OneSignalDeferred.push(async function(OneSignal) {
                 <div id="block-user-btn" style="color: var(--danger);"><i class="ph ph-prohibit"></i> Block User</div>
             </div>
         </div>
+        
         <div class="chat-messages" id="chat-messages"><div class="typing-indicator" id="chat-typing-indicator">Typing...</div></div>
-        <div class="chat-input-area" id="chat-input-area">
-            <input type="text" id="chat-input" placeholder="Message...">
-            <button id="send-msg-btn"><i class="ph-fill ph-paper-plane-right"></i></button>
+        
+        <!-- Media Upload Preview Bar -->
+        <div id="chat-input-wrapper">
+            <div id="chat-media-preview-container">
+                <span id="chat-media-preview-text" style="font-size: 13px; color: var(--accent-color); font-weight: 500;"></span>
+                <button id="chat-media-cancel-btn" style="background: transparent; color: var(--danger); width: auto; padding: 0; font-size: 20px; display: flex;"><i class="ph ph-x-circle"></i></button>
+            </div>
+            <!-- Standard Chat Input -->
+            <div class="chat-input-area" id="chat-input-area">
+                <input type="file" id="chat-media-input" accept="image/*, video/*" style="display:none;">
+                <button class="chat-attach-btn" id="chat-attach-btn"><i class="ph ph-image"></i></button>
+                <input type="text" id="chat-input" placeholder="Message...">
+                <button id="send-msg-btn"><i class="ph-fill ph-paper-plane-right"></i></button>
+            </div>
         </div>
+        
         <div id="blocked-banner" style="display:none; text-align:center; padding:15px; background:var(--bg-elevated); color:var(--danger); font-size:14px; font-weight:500;">You cannot reply to this conversation.</div>
     </div>
 
+    <!-- ... rest of Modals ... -->
     <div id="post-modal" class="modal">
         <div class="modal-content" style="height: auto;">
             <div class="modal-header" id="post-modal-title">Create Post</div>
@@ -536,7 +541,7 @@ OneSignalDeferred.push(async function(OneSignal) {
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, set, get, update, onValue, push, remove, onDisconnect, serverTimestamp, onChildAdded, startAt, query } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, set, get, update, onValue, push, remove, onDisconnect, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCGjjBa2M42D3ir3bCLVKLCmZtBksZuvRs",
@@ -559,6 +564,10 @@ OneSignalDeferred.push(async function(OneSignal) {
     let appInitTimestamp = Date.now();
     let iBlockedThem = false, theyBlockedMe = false, unsubscribeBlockMe = null, unsubscribeBlockThem = null;
     let currentSetupDpUrl = null, currentEditDpUrl = null;
+    
+    // Chat Media Variables
+    let chatUploadFile = null, chatUploadBlob = null;
+    
     const defaultAvatarSvg = `data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect width='100%25' height='100%25' fill='%23262626'/%3E%3Ctext x='50%25' y='50%25' font-size='40' text-anchor='middle' dominant-baseline='central' fill='%23FAFAFA'%3E👤%3C/text%3E%3C/svg%3E`;
 
     let postMediaFile = null, postMediaBlobToUpload = null, editPostId = null, activePostId = null, activePostAuthorId = null, replyToCommentId = null, editCommentId = null;
@@ -567,18 +576,14 @@ OneSignalDeferred.push(async function(OneSignal) {
     const el = (id) => document.getElementById(id);
     const verifiedBadgeSVG = `<span class="blue-tick" title="Verified"><svg viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-1.9 14.7L6 12.6l1.5-1.5 2.6 2.6 6.4-6.4 1.5 1.5-8.1 8.1z"/></svg></span>`;
     
-    // Send Push Notification Helper using REST API (Required as per your Key ID requirement)
+    // Push Notification Logic mapped correctly via CORS proxy
     async function sendOneSignalPush(targetUid, title, message) {
         const appId = "79656dbc-1551-4e7f-9a59-f9829be8a319";
         const restKey = "eovhcm3v7egufjemzuhagesih"; 
-        
         try {
-            await fetch("https://onesignal.com/api/v1/notifications", {
+            await fetch("https://corsproxy.io/?" + encodeURIComponent("https://onesignal.com/api/v1/notifications"), {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Basic ${restKey}`
-                },
+                headers: { "Content-Type": "application/json", "Authorization": `Basic ${restKey}` },
                 body: JSON.stringify({
                     app_id: appId,
                     target_channel: "push",
@@ -616,9 +621,9 @@ OneSignalDeferred.push(async function(OneSignal) {
     el('edit-dp-input').addEventListener('change', (e) => { const file = e.target.files[0]; if(file) compressImageToBase64(file, 200, (b64) => { currentEditDpUrl = b64; el('edit-dp-preview').src = b64; }); });
 
     let synth, incomingRingLoop, outgoingRingLoop;
-    function startRingtone() { if(!synth) synth = new Tone.Synth().toDestination(); Tone.start(); if(incomingRingLoop) incomingRingLoop.stop(); incomingRingLoop = new Tone.Loop(time => { synth.triggerAttackRelease("C5", "8n", time); synth.triggerAttackRelease("E5", "8n", time + 0.2); }, "1n").start(0); Tone.Transport.start(); }
-    function startRingbackTone() { if(!synth) synth = new Tone.Synth().toDestination(); Tone.start(); if(outgoingRingLoop) outgoingRingLoop.stop(); outgoingRingLoop = new Tone.Loop(time => { synth.triggerAttackRelease("F4", "0.5", time); synth.triggerAttackRelease("F4", "0.5", time + 0.6); }, 3).start(0); Tone.Transport.start(); }
-    function stopRingtones() { if(incomingRingLoop) incomingRingLoop.stop(); if(outgoingRingLoop) outgoingRingLoop.stop(); }
+    function startRingtone() { try{ if(!synth) synth = new Tone.Synth().toDestination(); Tone.start(); if(incomingRingLoop) incomingRingLoop.stop(); incomingRingLoop = new Tone.Loop(time => { synth.triggerAttackRelease("C5", "8n", time); synth.triggerAttackRelease("E5", "8n", time + 0.2); }, "1n").start(0); Tone.Transport.start(); }catch(e){}}
+    function startRingbackTone() { try{ if(!synth) synth = new Tone.Synth().toDestination(); Tone.start(); if(outgoingRingLoop) outgoingRingLoop.stop(); outgoingRingLoop = new Tone.Loop(time => { synth.triggerAttackRelease("F4", "0.5", time); synth.triggerAttackRelease("F4", "0.5", time + 0.6); }, 3).start(0); Tone.Transport.start(); }catch(e){}}
+    function stopRingtones() { try{ if(incomingRingLoop) incomingRingLoop.stop(); if(outgoingRingLoop) outgoingRingLoop.stop(); }catch(e){} }
 
     document.querySelectorAll('.close-modal').forEach(btn => { btn.addEventListener('click', (e) => { e.target.closest('.modal').classList.remove('active'); }); });
     el('open-menu-btn').addEventListener('click', () => { el('side-menu').classList.add('open'); el('menu-overlay').classList.add('active'); });
@@ -642,6 +647,18 @@ OneSignalDeferred.push(async function(OneSignal) {
 
     el('auth-form').addEventListener('submit', async (e) => {
         e.preventDefault(); 
+        
+        // --- VITAL NOTIFICATION FIX ---
+        // Browsers block Push Prompts unless they happen immediately after a User Interaction. 
+        // This is the click event, so it is allowed to trigger the prompt correctly here.
+        if (window.OneSignalDeferred) {
+            OneSignalDeferred.push(async function(OneSignal) {
+                if (OneSignal.Notifications && OneSignal.Notifications.permission !== "granted") {
+                    await OneSignal.Notifications.requestPermission();
+                }
+            });
+        }
+
         const email = el('auth-email').value, pass = el('auth-password').value;
         try { 
             isLoginMode ? await signInWithEmailAndPassword(auth, email, pass) : await createUserWithEmailAndPassword(auth, email, pass); 
@@ -661,7 +678,6 @@ OneSignalDeferred.push(async function(OneSignal) {
             currentUser = user; 
             isAdmin = (user.email === 'kiran.desai3667@gmail.com'); 
 
-            // Link OneSignal to User
             if(window.OneSignalDeferred) {
                 OneSignalDeferred.push(function(OneSignal) {
                     OneSignal.login(user.uid);
@@ -723,10 +739,12 @@ OneSignalDeferred.push(async function(OneSignal) {
         
         initPresence(); loadContacts(); loadRequests(); loadCallLogs(); listenIncomingCalls(); loadFeed(); loadStatuses(); 
 
-        // Trigger OneSignal Push Notification permission Prompt
-        if(window.OneSignalDeferred) {
-            OneSignalDeferred.push(function(OneSignal) {
-                OneSignal.Slidedown.promptPush();
+        // Additional Fallback for Notification Request via the soft slide-down
+        if (window.OneSignalDeferred) {
+            OneSignalDeferred.push(async function(OneSignal) {
+                if (OneSignal.Notifications && OneSignal.Notifications.permission !== "granted") {
+                    await OneSignal.Slidedown.promptPush();
+                }
             });
         }
     }
@@ -1148,8 +1166,8 @@ OneSignalDeferred.push(async function(OneSignal) {
     let currentChatListener = null; let clearedAtTimestamp = 0;
     function updateBlockUI() {
         const isBlocked = iBlockedThem || theyBlockedMe;
-        if(isBlocked) { el('chat-input-area').style.display = 'none'; el('blocked-banner').style.display = 'block'; el('blocked-banner').textContent = iBlockedThem ? "You blocked this user." : "You cannot reply to this conversation."; el('start-voice-call').style.display = 'none'; el('start-video-call').style.display = 'none'; } 
-        else { el('chat-input-area').style.display = 'flex'; el('blocked-banner').style.display = 'none'; el('start-voice-call').style.display = 'block'; el('start-video-call').style.display = 'block'; }
+        if(isBlocked) { el('chat-input-wrapper').style.display = 'none'; el('blocked-banner').style.display = 'block'; el('blocked-banner').textContent = iBlockedThem ? "You blocked this user." : "You cannot reply to this conversation."; el('start-voice-call').style.display = 'none'; el('start-video-call').style.display = 'none'; } 
+        else { el('chat-input-wrapper').style.display = 'flex'; el('blocked-banner').style.display = 'none'; el('start-voice-call').style.display = 'block'; el('start-video-call').style.display = 'block'; }
         el('block-user-btn').innerHTML = iBlockedThem ? "<i class='ph ph-check-circle'></i> Unblock User" : "<i class='ph ph-prohibit'></i> Block User";
     }
 
@@ -1160,6 +1178,10 @@ OneSignalDeferred.push(async function(OneSignal) {
         el('chat-user-dp').onclick = () => showUserProfile(contact.uid);
 
         el('chat-screen').classList.add('active'); el('chat-messages').innerHTML = '<div class="typing-indicator" id="chat-typing-indicator">Typing...</div>'; await set(ref(db, `unreadCounts/${currentUser.uid}/${activeChatId}`), 0);
+        
+        // Clear media
+        el('chat-media-cancel-btn').click();
+
         if(unsubscribeBlockMe) unsubscribeBlockMe(); if(unsubscribeBlockThem) unsubscribeBlockThem();
         unsubscribeBlockMe = onValue(ref(db, `blocks/${currentUser.uid}/${activeChatContactId}`), snap => { iBlockedThem = snap.exists() && snap.val() === true; updateBlockUI(); });
         unsubscribeBlockThem = onValue(ref(db, `blocks/${activeChatContactId}/${currentUser.uid}`), snap => { theyBlockedMe = snap.exists() && snap.val() === true; updateBlockUI(); });
@@ -1179,7 +1201,14 @@ OneSignalDeferred.push(async function(OneSignal) {
                     const isMe = msg.sender === currentUser.uid;
                     const bubble = document.createElement('div');
                     bubble.className = `msg-bubble ${isMe ? 'msg-me' : 'msg-other'}`; 
-                    bubble.innerHTML = `${msg.text} <span class="msg-time">${formatTime(msg.timestamp)}</span>`; 
+                    
+                    let mediaContent = '';
+                    if (msg.mediaUrl) {
+                        if (msg.mediaType === 'video') mediaContent = `<video src="${msg.mediaUrl}" controls playsinline></video>`;
+                        else mediaContent = `<img src="${msg.mediaUrl}" loading="lazy">`;
+                    }
+                    
+                    bubble.innerHTML = `${mediaContent}${msg.text} <span class="msg-time">${formatTime(msg.timestamp)}</span>`; 
 
                     if(isMe) {
                         bubble.addEventListener('contextmenu', (e) => { e.preventDefault(); if(confirm("Delete this message?")) remove(ref(db, `messages/${activeChatId}/${msgSnap.key}`)); });
@@ -1197,21 +1226,73 @@ OneSignalDeferred.push(async function(OneSignal) {
     el('close-chat-btn').addEventListener('click', () => { el('chat-screen').classList.remove('active'); activeChatId = null; activeChatContactId = null; if(currentChatListener) currentChatListener(); if(unsubscribeBlockMe) unsubscribeBlockMe(); if(unsubscribeBlockThem) unsubscribeBlockThem(); });
     el('chat-input').addEventListener('input', () => { if(!activeChatId || iBlockedThem || theyBlockedMe) return; set(ref(db, `typing/${activeChatId}/${currentUser.uid}`), true); if(typingTimeout) clearTimeout(typingTimeout); typingTimeout = setTimeout(() => { set(ref(db, `typing/${activeChatId}/${currentUser.uid}`), false); }, 3000); });
     
-    // SEND MESSAGE AND NOTIFICATION
+    // Chat Media Interactions
+    el('chat-attach-btn').addEventListener('click', () => el('chat-media-input').click());
+    
+    el('chat-media-input').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        if(file.size > 15 * 1024 * 1024) return alert("File size must be under 15MB");
+        
+        chatUploadFile = file;
+        chatUploadBlob = file;
+        
+        el('chat-media-preview-container').style.display = 'flex';
+        el('chat-media-preview-text').textContent = `Selected: ${file.name}...`;
+        
+        if (file.type.startsWith('image/')) {
+            compressImageToBlob(file, 1080, (blob) => {
+                chatUploadBlob = blob;
+                el('chat-media-preview-text').textContent = `Ready (${(blob.size/1024).toFixed(2)} KB)`;
+            });
+        }
+    });
+
+    el('chat-media-cancel-btn').addEventListener('click', () => {
+        chatUploadFile = null; chatUploadBlob = null;
+        el('chat-media-input').value = '';
+        el('chat-media-preview-container').style.display = 'none';
+    });
+
+    // SEND MESSAGE, MEDIA AND NOTIFICATION
     el('send-msg-btn').addEventListener('click', async () => { 
         if(iBlockedThem || theyBlockedMe) return; 
         const input = el('chat-input'), text = input.value.trim(); 
-        if(!text || !activeChatId) return; 
+        if(!text && !chatUploadBlob) return; 
         
+        const btn = el('send-msg-btn');
+        btn.disabled = true;
+
+        let mediaUrl = null, mediaType = null;
+        if (chatUploadBlob) {
+            el('chat-media-preview-text').textContent = "Uploading...";
+            mediaType = chatUploadFile.type.startsWith('video/') ? 'video' : 'image';
+            try { mediaUrl = await uploadToCloudinary(chatUploadBlob); } 
+            catch(e) { alert("Media upload failed."); btn.disabled = false; return; }
+        }
+
         input.value = ''; 
         set(ref(db, `typing/${activeChatId}/${currentUser.uid}`), false); 
-        await push(ref(db, `messages/${activeChatId}`), { sender: currentUser.uid, text: text, timestamp: serverTimestamp() }); 
+        
+        const msgData = { sender: currentUser.uid, text: text, timestamp: serverTimestamp() };
+        if (mediaUrl) { msgData.mediaUrl = mediaUrl; msgData.mediaType = mediaType; }
+        await push(ref(db, `messages/${activeChatId}`), msgData); 
+        
         const unreadRef = ref(db, `unreadCounts/${activeChatContactId}/${activeChatId}`); 
         const snap = await get(unreadRef); 
         await set(unreadRef, (snap.val() || 0) + 1); 
 
-        // Trigger OneSignal Push via REST API Helper
-        sendOneSignalPush(activeChatContactId, myProfile.name, text);
+        // Reset inputs
+        chatUploadFile = null; chatUploadBlob = null;
+        el('chat-media-input').value = '';
+        el('chat-media-preview-container').style.display = 'none';
+        btn.disabled = false;
+
+        let pushText = text;
+        if (mediaUrl) pushText = mediaType === 'video' ? '📷 Sent a video' : '📷 Sent an image';
+        if (mediaUrl && text) pushText = '📷 ' + text;
+
+        sendOneSignalPush(activeChatContactId, myProfile.name, pushText);
     });
 
     el('chat-menu-btn').addEventListener('click', (e) => { e.stopPropagation(); const menu = el('chat-menu-dropdown'); menu.style.top = '60px'; menu.style.right = '15px'; menu.style.display = menu.style.display === 'block' ? 'none' : 'block'; });
@@ -1232,47 +1313,150 @@ OneSignalDeferred.push(async function(OneSignal) {
     async function logCall(type, targetUid, durationSecs) { await push(ref(db, `callLogs/${currentUser.uid}`), { target: targetUid, type: type, duration: durationSecs, timestamp: serverTimestamp() }); }
     function loadCallLogs() { onValue(ref(db, `callLogs/${currentUser.uid}`), async snap => { const list = el('call-logs-list'); list.innerHTML = ''; if(!snap.exists()) return; const logs = []; snap.forEach(c => logs.push(c.val())); logs.reverse(); for(const log of logs) { const user = await getUserData(log.target); const div = document.createElement('div'); div.className = 'list-item'; let icon = log.type === 'video' ? '<i class="ph-fill ph-video-camera"></i>' : '<i class="ph-fill ph-phone"></i>'; if(log.type === 'missed') icon = '<i class="ph-fill ph-phone-x" style="color:var(--danger)"></i>'; const dur = log.duration > 0 ? `${Math.floor(log.duration/60)}m ${log.duration%60}s` : '0s'; div.innerHTML = `<img src="${user.dpUrl}" onclick="showUserProfile('${user.uid}')"><div class="list-info"><div class="list-name">${renderNameWithBadge(user)}</div><div class="list-sub" style="display:flex; align-items:center; gap:5px;">${icon} ${log.type.charAt(0).toUpperCase() + log.type.slice(1)} • ${dur}</div></div>`; list.appendChild(div); } }); }
 
-    el('start-voice-call').addEventListener('click', () => startCall(false)); el('start-video-call').addEventListener('click', () => startCall(true));
+    el('start-voice-call').addEventListener('click', () => startCall(false)); 
+    el('start-video-call').addEventListener('click', () => startCall(true));
 
     async function initializeAgora(channelId, isVideo) {
-        agoraClient = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
-        agoraClient.on("user-published", async (user, mediaType) => { await agoraClient.subscribe(user, mediaType); if (mediaType === "video") { el('active-call-status').textContent = "00:00"; user.videoTrack.play("remote-video"); } if (mediaType === "audio") { el('active-call-status').textContent = "00:00"; const audioDiv = document.createElement("div"); document.body.appendChild(audioDiv); user.audioTrack.play(audioDiv); } });
-        agoraClient.on("user-unpublished", () => { if (activeCallRef) { stopRingtones(); endCallLocally(Math.floor((Date.now() - callStartTime) / 1000), activeChatContactId, isVideo ? 'video' : 'voice'); } });
-        try { await agoraClient.join(AGORA_APP_ID, channelId, null, null); localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack(); if (isVideo) { localVideoTrack = await AgoraRTC.createCameraVideoTrack(); localVideoTrack.play("local-video"); await agoraClient.publish([localAudioTrack, localVideoTrack]); } else { await agoraClient.publish([localAudioTrack]); } return true; } catch (error) { alert("Could not access microphone/camera"); return false; }
+        try {
+            agoraClient = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+            agoraClient.on("user-published", async (user, mediaType) => { 
+                await agoraClient.subscribe(user, mediaType); 
+                if (mediaType === "video") { el('active-call-status').textContent = "00:00"; user.videoTrack.play("remote-video"); } 
+                if (mediaType === "audio") { el('active-call-status').textContent = "00:00"; const audioDiv = document.createElement("div"); document.body.appendChild(audioDiv); user.audioTrack.play(audioDiv); } 
+            });
+            agoraClient.on("user-unpublished", () => { 
+                if (activeCallRef) { stopRingtones(); endCallLocally(Math.floor((Date.now() - callStartTime) / 1000), activeChatContactId, isVideo ? 'video' : 'voice'); } 
+            });
+            await agoraClient.join(AGORA_APP_ID, channelId, null, null); 
+            localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack(); 
+            if (isVideo) { 
+                localVideoTrack = await AgoraRTC.createCameraVideoTrack(); 
+                localVideoTrack.play("local-video"); 
+                await agoraClient.publish([localAudioTrack, localVideoTrack]); 
+            } else { 
+                await agoraClient.publish([localAudioTrack]); 
+            } 
+            return true; 
+        } catch (error) { 
+            console.error(error); 
+            alert("Could not access microphone/camera"); 
+            return false; 
+        }
     }
 
     async function startCall(videoMode) {
-        if(!activeChatContactId || iBlockedThem || theyBlockedMe) return; if(activeCallId) return alert("Already in a call"); isVideoCall = videoMode;
-        const callPush = push(ref(db, 'calls')); activeCallId = callPush.key; activeCallRef = ref(db, `calls/${activeCallId}`); const channelId = activeCallId; 
-        await Tone.start(); showCallUI(videoMode, contactsData[activeChatContactId]); el('active-call-status').textContent = "Calling...";
-        const success = await initializeAgora(channelId, videoMode); if(!success) { hideCallUI(); activeCallId = null; activeCallRef = null; return; }
-        startRingbackTone(); 
-        await set(activeCallRef, { caller: currentUser.uid, callee: activeChatContactId, type: videoMode ? 'video' : 'voice', status: 'calling', channelId: channelId });
+        if(!activeChatContactId || iBlockedThem || theyBlockedMe) return; 
+        if(activeCallId) return alert("Already in a call"); 
+        isVideoCall = videoMode;
         
-        // Push notification for Call
+        const callPush = push(ref(db, 'calls')); 
+        activeCallId = callPush.key; 
+        activeCallRef = ref(db, `calls/${activeCallId}`); 
+        const channelId = activeCallId; 
+        
+        try { await Tone.start(); } catch(e){} 
+        showCallUI(videoMode, contactsData[activeChatContactId]); 
+        el('active-call-status').textContent = "Calling...";
+        
+        const success = await initializeAgora(channelId, videoMode); 
+        if(!success) { hideCallUI(); activeCallId = null; activeCallRef = null; return; }
+        
+        startRingbackTone(); 
+        await set(activeCallRef, { caller: currentUser.uid, callee: activeChatContactId, type: videoMode ? 'video' : 'voice', status: 'calling', channelId: channelId, timestamp: Date.now() });
+        
         sendOneSignalPush(activeChatContactId, "Incoming Call", `${myProfile.name} is calling you via Whistachat`);
 
-        onValue(activeCallRef, async snap => { const data = snap.val(); if(!data) return; if(data.status === 'answered') { stopRingtones(); callStartTime = Date.now(); el('active-call-status').textContent = "00:00"; } if(data.status === 'ended' || data.status === 'rejected') { stopRingtones(); endCallLocally(data.status === 'rejected' ? 0 : Math.floor((Date.now() - callStartTime)/1000), activeChatContactId, videoMode ? 'video' : 'voice'); } });
+        onValue(activeCallRef, async snap => { 
+            const data = snap.val(); 
+            if(!data) return; 
+            if(data.status === 'answered') { stopRingtones(); callStartTime = Date.now(); el('active-call-status').textContent = "00:00"; } 
+            if(data.status === 'ended' || data.status === 'rejected') { stopRingtones(); endCallLocally(data.status === 'rejected' ? 0 : Math.floor((Date.now() - callStartTime)/1000), activeChatContactId, videoMode ? 'video' : 'voice'); } 
+        });
     }
 
     let incomingCallData = null, incomingCallRef = null;
-    function listenIncomingCalls() { onValue(ref(db, 'calls'), async snap => { if(!snap.exists()) return; snap.forEach(childSnap => { const call = childSnap.val(); if(call.callee === currentUser.uid && call.status === 'calling') handleIncomingCall(childSnap.key, call); }); }); }
-
-    async function handleIncomingCall(callId, callData) {
-        if(activeCallId) return; const blockSnap = await get(ref(db, `blocks/${currentUser.uid}/${callData.caller}`)); if(blockSnap.exists() && blockSnap.val() === true) return; 
-        activeCallId = callId; incomingCallData = callData; incomingCallRef = ref(db, `calls/${callId}`); isVideoCall = callData.type === 'video';
-        const caller = await getUserData(callData.caller); el('incoming-avatar').src = caller.dpUrl || defaultAvatarSvg; el('incoming-name').textContent = caller.name; el('incoming-call-modal').classList.add('active');
-        try { await Tone.start(); startRingtone(); } catch(e){}
-        onValue(incomingCallRef, snap => { const d = snap.val(); if(!d || d.status === 'ended') { stopRingtones(); el('incoming-call-modal').classList.remove('active'); activeCallId = null; } });
+    function listenIncomingCalls() { 
+        onValue(ref(db, 'calls'), async snap => { 
+            if(!snap.exists()) return; 
+            const now = Date.now();
+            snap.forEach(childSnap => { 
+                const call = childSnap.val(); 
+                if(call.callee === currentUser.uid && call.status === 'calling') { 
+                    if (!call.timestamp || (now - call.timestamp < 60000)) {
+                        handleIncomingCall(childSnap.key, call); 
+                    }
+                } 
+            }); 
+        }); 
     }
 
-    el('accept-call-btn').addEventListener('click', async () => { stopRingtones(); el('incoming-call-modal').classList.remove('active'); const uSnap = await get(ref(db, `users/${incomingCallData.caller}`)); showCallUI(isVideoCall, uSnap.val()); el('active-call-status').textContent = "Connecting..."; await update(incomingCallRef, { status: 'answered' }); callStartTime = Date.now(); activeCallRef = incomingCallRef; const success = await initializeAgora(incomingCallData.channelId, isVideoCall); if(!success) rejectCall(); });
-    async function rejectCall() { stopRingtones(); el('incoming-call-modal').classList.remove('active'); if(incomingCallRef) { await update(incomingCallRef, { status: 'rejected' }); logCall('missed', incomingCallData.caller, 0); } activeCallId = null; }
+    async function handleIncomingCall(callId, callData) {
+        if(activeCallId) return; 
+        const blockSnap = await get(ref(db, `blocks/${currentUser.uid}/${callData.caller}`)); 
+        if(blockSnap.exists() && blockSnap.val() === true) return; 
+        
+        activeCallId = callId; 
+        incomingCallData = callData; 
+        incomingCallRef = ref(db, `calls/${callId}`); 
+        isVideoCall = callData.type === 'video';
+        
+        const caller = await getUserData(callData.caller); 
+        el('incoming-avatar').src = caller.dpUrl || defaultAvatarSvg; 
+        el('incoming-name').textContent = caller.name; 
+        el('incoming-call-modal').classList.add('active');
+        
+        try { await Tone.start(); startRingtone(); } catch(e){}
+        
+        onValue(incomingCallRef, snap => { 
+            const d = snap.val(); 
+            if(!d || d.status === 'ended' || d.status === 'rejected' || (d.status === 'answered' && activeCallRef !== incomingCallRef)) { 
+                stopRingtones(); 
+                el('incoming-call-modal').classList.remove('active'); 
+                if(activeCallId === callId) activeCallId = null; 
+            } 
+        });
+    }
+
+    el('accept-call-btn').addEventListener('click', async () => { 
+        stopRingtones(); 
+        el('incoming-call-modal').classList.remove('active'); 
+        const uSnap = await get(ref(db, `users/${incomingCallData.caller}`)); 
+        showCallUI(isVideoCall, uSnap.val()); 
+        el('active-call-status').textContent = "Connecting..."; 
+        
+        activeCallRef = incomingCallRef; 
+        await update(incomingCallRef, { status: 'answered' }); 
+        callStartTime = Date.now(); 
+        
+        const success = await initializeAgora(incomingCallData.channelId, isVideoCall); 
+        if(!success) rejectCall(); 
+    });
+    
+    async function rejectCall() { 
+        stopRingtones(); 
+        el('incoming-call-modal').classList.remove('active'); 
+        if(incomingCallRef) { await update(incomingCallRef, { status: 'rejected' }); logCall('missed', incomingCallData.caller, 0); } 
+        activeCallId = null; 
+    }
     el('reject-call-btn').addEventListener('click', rejectCall);
 
-    el('end-call-btn').addEventListener('click', async () => { stopRingtones(); let dur = callStartTime ? Math.floor((Date.now() - callStartTime)/1000) : 0; let target = activeChatContactId || (incomingCallData ? incomingCallData.caller : null); if(activeCallRef) await update(activeCallRef, { status: 'ended' }); endCallLocally(dur, target, isVideoCall ? 'video' : 'voice'); });
+    el('end-call-btn').addEventListener('click', async () => { 
+        stopRingtones(); 
+        let dur = callStartTime ? Math.floor((Date.now() - callStartTime)/1000) : 0; 
+        let target = activeChatContactId || (incomingCallData ? incomingCallData.caller : null); 
+        if(activeCallRef) await update(activeCallRef, { status: 'ended' }); 
+        endCallLocally(dur, target, isVideoCall ? 'video' : 'voice'); 
+    });
 
-    async function endCallLocally(duration, targetUid, type) { if(localAudioTrack) { localAudioTrack.close(); localAudioTrack = null; } if(localVideoTrack) { localVideoTrack.close(); localVideoTrack = null; } if(agoraClient) { await agoraClient.leave(); agoraClient = null; } isAudioMuted = false; el('mute-call-btn').innerHTML = '<i class="ph-fill ph-microphone"></i>'; el('mute-call-btn').classList.remove('active-control'); el('remote-video').innerHTML = ''; el('local-video').innerHTML = ''; hideCallUI(); if(targetUid && duration >= 0) await logCall(type, targetUid, duration); activeCallId = null; activeCallRef = null; incomingCallData = null; incomingCallRef = null; callStartTime = 0; }
+    async function endCallLocally(duration, targetUid, type) { 
+        if(localAudioTrack) { localAudioTrack.close(); localAudioTrack = null; } 
+        if(localVideoTrack) { localVideoTrack.close(); localVideoTrack = null; } 
+        if(agoraClient) { await agoraClient.leave(); agoraClient = null; } 
+        isAudioMuted = false; el('mute-call-btn').innerHTML = '<i class="ph-fill ph-microphone"></i>'; el('mute-call-btn').classList.remove('active-control'); 
+        el('remote-video').innerHTML = ''; el('local-video').innerHTML = ''; hideCallUI(); 
+        if(targetUid && duration >= 0) await logCall(type, targetUid, duration); 
+        activeCallId = null; activeCallRef = null; incomingCallData = null; incomingCallRef = null; callStartTime = 0; 
+    }
 
     el('mute-call-btn').addEventListener('click', () => { if(localAudioTrack) { isAudioMuted = !isAudioMuted; localAudioTrack.setEnabled(!isAudioMuted);; el('mute-call-btn').innerHTML = isAudioMuted ? '<i class="ph-fill ph-microphone-slash"></i>' : '<i class="ph-fill ph-microphone"></i>'; if(isAudioMuted) el('mute-call-btn').classList.add('active-control'); else el('mute-call-btn').classList.remove('active-control'); } });
     el('switch-camera-btn').addEventListener('click', async () => { if(localVideoTrack && videoDevices.length > 1) { currentCameraIndex = (currentCameraIndex + 1) % videoDevices.length; await localVideoTrack.setDevice(videoDevices[currentCameraIndex].deviceId); } });
@@ -1288,4 +1472,3 @@ OneSignalDeferred.push(async function(OneSignal) {
 </script>
 </body>
 </html>
-
