@@ -1,0 +1,13 @@
+{
+  "background_color": "#000000",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "Whistachat",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "Whistachat",
+  "start_url": "/",
+  "theme_color": "#000000",
+  "description": "Whistachat messaging app",
+  "id": "/?source=pwa"
+}
