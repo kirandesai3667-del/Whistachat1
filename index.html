@@ -25,9 +25,10 @@ OneSignalDeferred.push(async function(OneSignal) {
     appId: "79656dbc-1551-4e7f-9a59-f9829be8a319",
     notifyButton: {
       enable: true
-    },
-    allowLocalhostAsSecureOrigin: true
+    }
   });
+
+  OneSignal.showSlidedownPrompt(); // 👈 notification allow popup
 });
 </script>
 
@@ -1287,3 +1288,4 @@ OneSignalDeferred.push(async function(OneSignal) {
 </script>
 </body>
 </html>
+
