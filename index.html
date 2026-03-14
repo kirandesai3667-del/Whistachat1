@@ -12,9 +12,9 @@
     <meta name="display" content="standalone">
 
     <title>Whistachat</title>
-<link rel="manifest" href="/Whistachat1/manifest.json">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="manifest" href="/Whistachat1/manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
     <!-- WebRTC, Tone.js & Push Notifications -->
     <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.18.2.js"></script>
@@ -23,335 +23,302 @@
     
     <!-- IMPORTANT: Make sure OneSignalSDKWorker.js is in your root directory! -->
     <script>
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function(OneSignal) {
-      await OneSignal.init({
-        appId: "79656dbc-1551-4e7f-9a59-f9829be8a319",
-        notifyButton: { enable: true },
-        allowLocalhostAsSecureOrigin: true
-      });
-      
-      // Attempt to request permission immediately upon initialization
-      if (OneSignal.Notifications && OneSignal.Notifications.permission !== "granted") {
-          OneSignal.Notifications.requestPermission();
-      }
-    });
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.init({
+                appId: "79656dbc-1551-4e7f-9a59-f9829be8a319",
+                notifyButton: { enable: true },
+                allowLocalhostAsSecureOrigin: true
+            });
+            
+            // Attempt to request permission immediately upon initialization
+            if (OneSignal.Notifications && OneSignal.Notifications.permission !== "granted") {
+                OneSignal.Notifications.requestPermission();
+            }
+        });
     </script>
 
     <style>
-        /* ================= ULTRA-MODERN UI THEME ================= */
+        /* ================= ULTRA-MODERN PREMIUM UI THEME ================= */
         :root {
+            /* Instagram/Threads Style Dark Mode */
             --bg-base: #000000;
-            --bg-surface: #121212;
-            --bg-elevated: #262626;
-            --bg-glass: rgba(38, 38, 38, 0.7);
-            --text-primary: #FAFAFA;
+            --bg-surface: #0a0a0a;
+            --bg-elevated: #1a1a1a;
+            --bg-glass: rgba(0, 0, 0, 0.85);
+            --text-primary: #F5F5F5;
             --text-secondary: #A8A8A8;
             --accent-color: #0095F6; 
             --accent-hover: #1877F2;
-            --gradient-primary: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
-            --danger: #ED4956;
-            --success: #00A878;
-            --border-color: #363636;
+            --gradient-insta: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            --danger: #ff3040;
+            --success: #00ba7c;
+            --border-color: #262626;
+            --border-light: #363636;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        
-        body { background-color: #000; height: 100vh; width: 100vw; overflow: hidden; color: var(--text-primary); }
+        /* GLOBALS */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-base); height: 100vh; width: 100vw; overflow: hidden; color: var(--text-primary); }
 
-        .brand-text { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        /* BRANDING */
+        .brand-gradient-text {
+            background: var(--gradient-insta);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: inline-block;
+        }
+        .brand-text { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; font-family: 'Inter', sans-serif; }
 
-        /* FULL SCREEN APP WRAPPER */
+        /* APP WRAPPER & SCREENS */
         #app-wrapper { width: 100%; height: 100%; background-color: var(--bg-base); position: relative; overflow: hidden; display: flex; flex-direction: column; }
-
-        input, textarea { width: 100%; padding: 14px 16px; border-radius: 12px; background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-color); margin-bottom: 15px; font-size: 14px; transition: 0.3s; }
-        input:focus, textarea:focus { border-color: var(--accent-color); outline: none; background: var(--bg-elevated); }
-        
-        button { outline: none; border: none; background: var(--accent-color); color: #fff; padding: 14px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; width: 100%; font-size: 15px; }
-        button:active { transform: scale(0.98); background: var(--accent-hover); }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-        
-        .btn-secondary { background: var(--bg-elevated); color: var(--text-primary); border: 1px solid var(--border-color); }
-        .btn-danger { background: var(--danger); color: white; }
-
         .screen { display: none; flex-direction: column; height: 100%; width: 100%; position: absolute; top: 0; left: 0; background: var(--bg-base); z-index: 10; }
         .screen.active { display: flex; }
+        .tab-content { flex: 1; overflow-y: auto; display: none; background: var(--bg-base); scroll-behavior: smooth; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+
+        /* FORMS & BUTTONS */
+        input, textarea { width: 100%; padding: 14px 16px; border-radius: 12px; background: var(--bg-elevated); color: var(--text-primary); border: 1px solid transparent; margin-bottom: 15px; font-size: 15px; transition: 0.3s ease; }
+        input:focus, textarea:focus { border-color: var(--text-secondary); outline: none; background: #222; }
+        button { outline: none; border: none; background: var(--accent-color); color: #fff; padding: 14px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: transform 0.2s ease, background 0.2s ease; width: 100%; font-size: 15px; }
+        button:active { transform: scale(0.96); background: var(--accent-hover); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-secondary { background: transparent; color: var(--text-primary); border: 1px solid var(--border-light); }
+        .btn-danger { background: var(--danger); color: white; }
+
+        /* HEADER (STICKY & GLASSMORPHISM) */
+        .header { 
+            background: var(--bg-glass); 
+            backdrop-filter: blur(16px); 
+            -webkit-backdrop-filter: blur(16px);
+            padding: 12px 16px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            z-index: 30; 
+            border-bottom: 1px solid var(--border-color); 
+            flex-shrink: 0; 
+            position: sticky;
+            top: 0;
+        }
+        .header-actions { display: flex; gap: 20px; align-items: center; }
+        .action-btn { background: transparent; color: var(--text-primary); width: auto; padding: 0; font-size: 26px; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; transition: color 0.2s, transform 0.2s; }
+        .action-btn:active { color: var(--text-secondary); transform: scale(0.9); }
+
+        /* LOGIN SCREEN */
+        #auth-screen { justify-content: center; padding: 30px; background: radial-gradient(circle at top right, #1a0b2e, var(--bg-base)); }
+        .auth-logo { font-size: 48px; text-align: center; font-weight: 800; letter-spacing: -1px; }
+        .toggle-auth { text-align: center; font-size: 14px; margin-top: 25px; color: var(--text-secondary); cursor: pointer; font-weight: 500; transition: color 0.2s; }
+        .toggle-auth:hover { color: var(--text-primary); }
+        .input-group { position: relative; width: 100%; margin-bottom: 15px; }
+        .input-group input { margin-bottom: 0; padding-right: 60px; }
+        .toggle-password { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); font-size: 13px; font-weight: 600; cursor: pointer; user-select: none; letter-spacing: 0.5px;}
+        .developer-credit { text-align: center; font-size: 12px; color: var(--text-secondary); position: absolute; bottom: 30px; width: 100%; left: 0; font-weight: 500;}
+
+        /* BOTTOM NAVIGATION */
+        .bottom-nav { display: flex; justify-content: space-around; background: var(--bg-base); border-top: 1px solid var(--border-color); z-index: 20; width: 100%; flex-shrink: 0; padding: 12px 0 calc(12px + env(safe-area-inset-bottom)); }
+        .nav-item { color: var(--text-secondary); display: flex; justify-content: center; align-items: center; cursor: pointer; transition: color 0.2s ease; width: 100%; padding: 8px 0; }
+        .nav-item.active { color: var(--text-primary); }
+        .nav-item i { font-size: 28px; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .nav-item.active i { transform: scale(1.15); font-weight: bold; }
+
+        /* INSTAGRAM-STYLE STORIES */
+        .status-bar { display: flex; gap: 16px; overflow-x: auto; padding: 14px 16px; border-bottom: 1px solid var(--border-color); background: var(--bg-base); scroll-behavior: smooth; scrollbar-width: none; }
+        .status-bar::-webkit-scrollbar { display: none; }
+        .status-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; min-width: 72px; }
+        .status-circle-container { width: 72px; height: 72px; border-radius: 50%; padding: 2.5px; background: var(--gradient-insta); margin-bottom: 6px; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .status-circle-container.seen { background: var(--border-light); }
+        .status-circle-container.add-status { background: transparent; border: none; padding: 2px; box-shadow: none; }
+        .status-circle { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid var(--bg-base); }
+        .add-status-icon { width: 100%; height: 100%; border-radius: 50%; background: var(--bg-elevated); display: flex; justify-content: center; align-items: center; font-size: 24px; color: var(--text-primary); border: 3px solid var(--bg-base); }
+        .status-name { font-size: 12px; color: var(--text-primary); text-align: center; width: 74px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 400;}
+
+        /* MODERN POST FEED */
+        .post-card { background: var(--bg-base); border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 0; }
+        .post-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px;}
+        .post-user { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 14px; cursor: pointer; }
+        .post-user img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-light); }
         
-        .modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100; justify-content: center; align-items: flex-end; backdrop-filter: blur(5px); }
+        .post-media { width: 100%; max-height: 550px; background: #000; display: flex; justify-content: center; align-items: center; position: relative; }
+        .post-media img, .post-media video { width: 100%; max-height: 550px; object-fit: cover; }
+        
+        .post-actions { padding: 12px 16px 8px; display: flex; gap: 20px; align-items: center; }
+        .post-btn { background: transparent; color: var(--text-primary); padding: 0; font-size: 26px; cursor: pointer; border: none; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .post-btn:active { transform: scale(0.85); color: var(--text-secondary); }
+        
+        /* Like Animation */
+        .ph-fill.ph-heart { color: var(--danger); animation: heartBurst 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes heartBurst { 0% { transform: scale(0.8); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        
+        .post-likes-count { padding: 0 16px; font-size: 14px; font-weight: 600; margin-bottom: 6px;}
+        .post-caption { padding: 0 16px; font-size: 14px; line-height: 1.4; color: var(--text-primary); }
+
+        /* LIST ITEMS (CHATS & CONTACTS) */
+        .list-item { display: flex; align-items: center; padding: 12px 16px; cursor: pointer; transition: background 0.2s; }
+        .list-item:active { background: var(--bg-elevated); }
+        .list-item img { width: 52px; height: 52px; border-radius: 50%; margin-right: 15px; object-fit: cover; }
+        .list-info { flex: 1; overflow: hidden; }
+        .list-name { font-weight: 600; font-size: 15px; display: flex; justify-content: space-between; align-items: center; color: var(--text-primary); margin-bottom: 2px; }
+        .list-sub { font-size: 13px; color: var(--text-secondary); display: flex; justify-content: space-between; }
+        .online-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--success); display: inline-block; margin-left: 6px; box-shadow: 0 0 6px rgba(0, 186, 120, 0.4); }
+        .offline-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border-light); display: inline-block; margin-left: 6px; }
+        .unread-badge { background: var(--danger); color: white; font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: 700; }
+
+        /* MODALS */
+        .modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 100; justify-content: center; align-items: flex-end; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
         .modal.active { display: flex; animation: fadeIn 0.3s ease forwards; }
-        .modal-content { background: var(--bg-surface); width: 100%; max-height: 90vh; overflow-y: auto; padding: 25px 20px; border-radius: 20px 20px 0 0; display: flex; flex-direction: column; animation: slideUp 0.3s cubic-bezier(0.1, 0.8, 0.2, 1) forwards; }
+        .modal-content { background: var(--bg-surface); width: 100%; max-height: 90vh; overflow-y: auto; padding: 30px 20px 40px; border-radius: 24px 24px 0 0; display: flex; flex-direction: column; animation: slideUp 0.3s cubic-bezier(0.1, 0.8, 0.2, 1) forwards; position: relative; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        .modal-header { font-size: 18px; font-weight: 600; margin-bottom: 20px; text-align: center; position: relative; }
-        .modal-header::after { content: ''; position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); width: 40px; height: 4px; background: var(--border-color); border-radius: 4px; }
+        .modal-header { font-size: 18px; font-weight: 700; margin-bottom: 24px; text-align: center; position: relative; }
+        .modal-header::after { content: ''; position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 40px; height: 4px; background: var(--border-light); border-radius: 4px; }
 
-        #auth-screen { justify-content: center; padding: 30px; background: radial-gradient(circle at top right, #2a0845, #000000); }
-        .auth-logo { font-size: 42px; text-align: center; margin-bottom: 40px; font-family: 'Inter', sans-serif; font-weight: 800; }
-        .toggle-auth { text-align: center; font-size: 14px; margin-top: 20px; color: var(--accent-color); cursor: pointer; font-weight: 500; }
-        .input-group { position: relative; width: 100%; margin-bottom: 15px; }
-        .input-group input { margin-bottom: 0; padding-right: 60px; }
-        .toggle-password { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); font-size: 13px; font-weight: 600; cursor: pointer; user-select: none; }
-        .developer-credit { text-align: center; font-size: 11px; color: var(--text-secondary); position: absolute; bottom: 30px; width: 100%; left: 0; }
-
-        .header { background: var(--bg-base); padding: 15px 20px; display: flex; justify-content: flex-end; align-items: center; z-index: 20; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
-        .action-btn { background: transparent; color: var(--text-primary); width: auto; padding: 0; font-size: 26px; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; }
-
-        #side-menu { position: absolute; top: 0; left: -280px; width: 280px; height: 100%; background: var(--bg-surface); z-index: 50; transition: transform 0.3s cubic-bezier(0.1, 0.8, 0.2, 1); padding: 30px 20px; box-shadow: 2px 0 20px rgba(0,0,0,0.9); }
-        #side-menu.open { transform: translateX(280px); }
-        .menu-overlay { display: none; position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); z-index: 40; backdrop-filter: blur(2px); }
-        .menu-overlay.active { display: block; }
-        .profile-summary { text-align: center; margin-bottom: 30px; }
-        .profile-summary img { width: 90px; height: 90px; border-radius: 50%; margin-bottom: 15px; object-fit: cover; border: 2px solid var(--bg-elevated); }
-        .menu-item { padding: 18px 10px; border-radius: 12px; cursor: pointer; color: var(--text-primary); font-weight: 500; display: flex; align-items: center; gap: 15px; font-size: 15px; transition: 0.2s;}
+        /* SIDE MENU */
+        .menu-overlay { display: none; position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); z-index: 40; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+        .menu-overlay.active { display: block; animation: fadeIn 0.3s ease; }
+        #side-menu { position: absolute; top: 0; left: -300px; width: 300px; height: 100%; background: var(--bg-surface); z-index: 50; transition: transform 0.3s cubic-bezier(0.1, 0.8, 0.2, 1); padding: 40px 20px; box-shadow: 2px 0 30px rgba(0,0,0,0.9); }
+        #side-menu.open { transform: translateX(300px); }
+        .profile-summary { text-align: center; margin-bottom: 40px; }
+        .profile-summary img { width: 100px; height: 100px; border-radius: 50%; margin-bottom: 15px; object-fit: cover; border: 2px solid var(--border-light); padding: 2px; }
+        .menu-item { padding: 16px 12px; border-radius: 14px; cursor: pointer; color: var(--text-primary); font-weight: 500; display: flex; align-items: center; gap: 16px; font-size: 15px; transition: 0.2s;}
         .menu-item:hover { background: var(--bg-elevated); }
-        .menu-item i { font-size: 22px; color: var(--text-secondary); }
-        
-        .file-upload-wrapper { display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; }
-        .file-upload-wrapper img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 3px solid var(--border-color); }
-        .file-upload-wrapper input[type="file"] { display: none; }
-        .file-upload-wrapper label { background: var(--bg-elevated); padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text-primary); }
+        .menu-item i { font-size: 24px; color: var(--text-secondary); }
 
-        .tab-content { flex: 1; overflow-y: auto; display: none; background: var(--bg-base); }
-        .tab-content.active { display: block; }
-        .list-item { display: flex; align-items: center; padding: 12px 20px; cursor: pointer; transition: 0.2s; }
-        .list-item:active { background: var(--bg-elevated); }
-        .list-item img { width: 50px; height: 50px; border-radius: 50%; margin-right: 15px; object-fit: cover; }
-        .list-info { flex: 1; overflow: hidden; }
-        .list-name { font-weight: 600; font-size: 15px; display: flex; justify-content: space-between; align-items: center; color: var(--text-primary); }
-        .list-sub { font-size: 13px; color: var(--text-secondary); display: flex; justify-content: space-between; margin-top: 3px; }
-        .online-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); display: inline-block; margin-left: 5px; box-shadow: 0 0 5px var(--success); }
-        .offline-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-secondary); display: inline-block; margin-left: 5px; }
-        .unread-badge { background: var(--danger); color: white; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: bold; }
-
-        .status-bar { display: flex; gap: 15px; overflow-x: auto; padding: 15px 20px; border-bottom: 1px solid var(--border-color); background: var(--bg-base); scroll-behavior: smooth; }
-        .status-bar::-webkit-scrollbar { display: none; }
-        .status-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; min-width: 68px; }
-        .status-circle-container { width: 68px; height: 68px; border-radius: 50%; padding: 3px; background: var(--gradient-primary); margin-bottom: 6px; display: flex; justify-content: center; align-items: center; }
-        .status-circle-container.seen { background: var(--border-color); }
-        .status-circle-container.add-status { background: transparent; border: 2px dashed var(--text-secondary); padding: 2px; }
-        .status-circle { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid var(--bg-base); }
-        .add-status-icon { width: 100%; height: 100%; border-radius: 50%; background: var(--bg-surface); display: flex; justify-content: center; align-items: center; font-size: 24px; color: var(--text-secondary); border: 3px solid var(--bg-base); }
-        .status-name { font-size: 11px; color: var(--text-primary); text-align: center; width: 70px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500;}
-
-        /* POST & FEED UI */
-        .post-card { background: var(--bg-base); border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 10px; }
-        .post-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px;}
-        .post-user { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 14px; cursor: pointer; }
-        .post-user img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
-        .post-media { width: 100%; max-height: 450px; background: #000; display: flex; justify-content: center; align-items: center; }
-        .post-media img, .post-media video { width: 100%; max-height: 450px; object-fit: contain; }
-        .post-actions { padding: 12px 15px 8px; display: flex; gap: 18px; align-items: center; }
-        .post-btn { background: transparent; color: var(--text-primary); padding: 0; font-size: 26px; cursor: pointer; transition: 0.2s; border: none;}
-        .post-btn:active { transform: scale(0.9); color: var(--text-secondary); }
-        .post-likes-count { padding: 0 15px; font-size: 14px; font-weight: 600; margin-bottom: 5px;}
-        .post-caption { padding: 0 15px; font-size: 14px; line-height: 1.4; color: var(--text-primary); }
-
-        .bottom-nav { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--bg-base); border-top: 1px solid var(--border-color); z-index: 20; width: 100%; flex-shrink: 0; padding: 12px 0; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
-        .nav-item { color: var(--text-secondary); display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; }
-        .nav-item.active { color: var(--text-primary); }
-        .nav-item i { font-size: 28px; transition: transform 0.2s; }
-        .nav-item.active i { transform: scale(1.1); font-weight: bold; }
-
+        /* STATUS VIEWER */
         #status-viewer-modal { background: #000; padding: 0; display: none; flex-direction: column; position: absolute; z-index: 200; width: 100%; height: 100%; top: 0; left: 0; }
         #status-viewer-modal.active { display: flex; animation: fadeIn 0.2s ease forwards; }
-        .status-progress-container { display: flex; gap: 5px; padding: 10px; position: absolute; top: 0; width: 100%; z-index: 202; }
+        .status-progress-container { display: flex; gap: 4px; padding: 12px; position: absolute; top: 0; width: 100%; z-index: 202; }
         .status-progress-bar { flex: 1; height: 2px; background: rgba(255,255,255,0.3); border-radius: 2px; overflow: hidden; }
         .status-progress-fill { width: 0%; height: 100%; background: #fff; transition: width 0.1s linear; }
-        .status-viewer-header { position: absolute; top: 15px; width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; z-index: 202; background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent); }
-        .status-viewer-user { display: flex; align-items: center; gap: 10px; color: #fff; font-size: 14px; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.8); cursor: pointer; }
-        .status-viewer-user img { width: 35px; height: 35px; border-radius: 50%; border: 1px solid #fff; }
-        .status-media-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; background: #111; position: relative; width: 100%; height: 100%; }
-        .status-media-wrapper img, .status-media-wrapper video { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
-        .status-viewer-footer { position: absolute; bottom: 0; width: 100%; padding: 25px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 202; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); }
-        .sv-action-btn { background: rgba(255,255,255,0.15); border: none; color: #fff; font-size: 24px; width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; backdrop-filter: blur(5px); }
+        .status-viewer-header { position: absolute; top: 20px; width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; z-index: 202; background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent); }
+        .status-viewer-user { display: flex; align-items: center; gap: 12px; color: #fff; font-size: 14px; font-weight: 600; text-shadow: 0 1px 4px rgba(0,0,0,0.8); cursor: pointer; }
+        .status-viewer-user img { width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid #fff; }
+        .status-media-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; background: #000; position: relative; width: 100%; height: 100%; }
+        .status-media-wrapper img, .status-media-wrapper video { width: 100%; height: 100%; object-fit: cover; }
+        .status-viewer-footer { position: absolute; bottom: 0; width: 100%; padding: 30px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 202; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); }
+        .sv-action-btn { background: rgba(255,255,255,0.15); border: none; color: #fff; font-size: 26px; width: 48px; height: 48px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
         .sv-action-btn.liked { color: var(--danger); }
-        .sv-view-count { color: #fff; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 6px; cursor: pointer; background: rgba(0,0,0,0.6); padding: 8px 16px; border-radius: 20px; backdrop-filter: blur(5px); }
+        .sv-view-count { color: #fff; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer; background: rgba(0,0,0,0.6); padding: 10px 18px; border-radius: 24px; backdrop-filter: blur(8px); }
 
-        #comments-modal .modal-content { height: 90vh; padding: 0; border-radius: 20px 20px 0 0; }
-        #comments-header { padding: 20px; border-bottom: 1px solid var(--border-color); text-align: center; font-weight: 600; position: relative; }
-        #close-comments-btn { position: absolute; left: 15px; top: 18px; font-size: 24px; }
-        #comments-list { flex: 1; overflow-y: auto; padding: 20px 15px; }
-        .comment-item { display: flex; gap: 12px; margin-bottom: 20px; }
-        .comment-item img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; cursor: pointer; }
+        /* COMMENTS */
+        #comments-modal .modal-content { height: 90vh; padding: 0; border-radius: 24px 24px 0 0; }
+        #comments-header { padding: 20px; border-bottom: 1px solid var(--border-color); text-align: center; font-weight: 700; position: relative; }
+        #close-comments-btn { position: absolute; left: 15px; top: 15px; font-size: 28px; }
+        #comments-list { flex: 1; overflow-y: auto; padding: 20px 16px; }
+        .comment-item { display: flex; gap: 14px; margin-bottom: 24px; }
+        .comment-item img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; }
         .comment-content { flex: 1; }
-        .comment-author { font-weight: 600; font-size: 13px; margin-bottom: 2px; color: var(--text-primary); cursor: pointer; }
-        .comment-text { font-size: 14px; margin-bottom: 6px; word-wrap: break-word; color: #e0e0e0; }
-        .comment-actions { display: flex; gap: 12px; font-size: 12px; color: var(--text-secondary); font-weight: 500; }
-        .comment-actions span { cursor: pointer; }
-        .reply-thread { margin-left: 48px; margin-top: -5px;}
-        #comment-input-container { padding: 15px; border-top: 1px solid var(--border-color); background: var(--bg-surface); padding-bottom: calc(15px + env(safe-area-inset-bottom)); }
+        .comment-author { font-weight: 600; font-size: 14px; margin-bottom: 4px; color: var(--text-primary); cursor: pointer; }
+        .comment-text { font-size: 14px; margin-bottom: 8px; word-wrap: break-word; color: #E0E0E0; line-height: 1.4; }
+        .comment-actions { display: flex; gap: 16px; font-size: 12px; color: var(--text-secondary); font-weight: 600; }
+        .comment-actions span { cursor: pointer; transition: color 0.2s; }
+        .comment-actions span:hover { color: var(--text-primary); }
+        .reply-thread { margin-left: 54px; margin-top: -10px;}
+        #comment-input-container { padding: 16px; border-top: 1px solid var(--border-color); background: var(--bg-surface); padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+        #replying-to-banner { display:none; justify-content:space-between; align-items:center; padding:10px 14px; font-size:13px; color:var(--text-secondary); background:var(--bg-elevated); border-radius:12px; margin-bottom:12px; font-weight: 500;}
+        #cancel-reply-btn { cursor:pointer; color:var(--danger); font-size:20px; }
 
-        #chat-header { padding: 12px 15px; background: var(--bg-surface); justify-content: space-between; }
-        #chat-header img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; }
-        .chat-header-actions { display: flex; gap: 18px; margin-left: auto; }
-        .chat-messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; background: var(--bg-base); }
+        /* CHAT SCREEN */
+        #chat-header { padding: 12px 16px; background: var(--bg-glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); justify-content: space-between; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid var(--border-color); }
+        #chat-header img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 1px solid var(--border-light); }
+        .chat-header-actions { display: flex; gap: 20px; margin-left: auto; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; background: var(--bg-base); }
         
-        /* Message Bubble & Media Updates */
-        .msg-bubble { max-width: 75%; padding: 12px 16px; border-radius: 20px; font-size: 14.5px; line-height: 1.4; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.2); user-select: none; position: relative;}
-        .msg-bubble img, .msg-bubble video { max-width: 100%; border-radius: 12px; margin-bottom: 5px; display: block; }
+        .msg-bubble { max-width: 75%; padding: 12px 16px; border-radius: 20px; font-size: 15px; line-height: 1.4; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.1); user-select: none; position: relative;}
+        .msg-bubble img, .msg-bubble video { max-width: 100%; border-radius: 12px; margin-bottom: 6px; display: block; object-fit: cover; }
         .msg-me { align-self: flex-end; background: var(--accent-color); color: #fff; border-bottom-right-radius: 4px; }
         .msg-other { align-self: flex-start; background: var(--bg-elevated); color: var(--text-primary); border-bottom-left-radius: 4px; }
-        .msg-time { font-size: 10px; opacity: 0.7; margin-top: 5px; text-align: right; display: block; }
+        .msg-time { font-size: 11px; opacity: 0.7; margin-top: 6px; text-align: right; display: block; font-weight: 500; }
         
-        #chat-input-wrapper { background: var(--bg-surface); border-top: 1px solid var(--border-color); padding-bottom: env(safe-area-inset-bottom); display: flex; flex-direction: column; width: 100%;}
-        #chat-media-preview-container { display: none; padding: 10px 15px; background: var(--bg-surface); border-bottom: 1px solid var(--border-color); justify-content: space-between; align-items: center; }
-        .chat-input-area { display: flex; gap: 10px; align-items: center; padding: 15px; }
-        .chat-input-area input[type="text"] { margin: 0; flex: 1; border-radius: 25px; padding: 12px 18px; background: var(--bg-base); }
-        .chat-input-area button { width: 45px; height: 45px; border-radius: 50%; padding: 0; display: flex; justify-content: center; align-items: center; background: var(--accent-color); }
-        .chat-attach-btn { background: transparent !important; color: var(--text-secondary) !important; padding: 0 !important; font-size: 26px !important; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; border-radius: 0 !important; width: auto !important; height: auto !important;}
-        .chat-attach-btn:active { transform: scale(0.9); }
+        #chat-input-wrapper { background: var(--bg-surface); border-top: 1px solid var(--border-color); padding-bottom: env(safe-area-inset-bottom); display: flex; flex-direction: column; width: 100%; z-index: 20;}
+        #chat-media-preview-container { display: none; padding: 12px 16px; background: var(--bg-elevated); border-bottom: 1px solid var(--border-color); justify-content: space-between; align-items: center; border-radius: 12px 12px 0 0;}
+        .chat-input-area { display: flex; gap: 12px; align-items: center; padding: 14px 16px; }
+        .chat-input-area input[type="text"] { margin: 0; flex: 1; border-radius: 24px; padding: 14px 18px; background: var(--bg-elevated); font-size: 15px; border: 1px solid transparent; }
+        .chat-input-area input[type="text"]:focus { border-color: var(--border-light); }
+        .chat-input-area button { width: 48px; height: 48px; border-radius: 50%; padding: 0; display: flex; justify-content: center; align-items: center; background: var(--accent-color); font-size: 22px; }
+        .chat-attach-btn { background: transparent !important; color: var(--text-secondary) !important; padding: 0 !important; font-size: 28px !important; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; border-radius: 0 !important; width: auto !important; height: auto !important;}
+        .chat-attach-btn:active { transform: scale(0.9); color: var(--text-primary) !important; }
 
-        #user-profile-modal .modal-content { align-items: center; padding: 40px 20px; text-align: center; }
-        .up-dp-large { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--bg-elevated); margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        .up-name-large { font-size: 22px; font-weight: 700; color: var(--text-primary); margin-bottom: 5px; }
-        .up-id-badge { background: var(--bg-elevated); padding: 4px 10px; border-radius: 12px; font-size: 12px; color: var(--text-secondary); margin-bottom: 20px; font-weight: 500;}
-        .up-bio-box { font-size: 14px; color: var(--text-primary); line-height: 1.5; padding: 0 20px; margin-bottom: 30px; }
+        /* USER PROFILE MODAL */
+        #user-profile-modal .modal-content { align-items: center; padding: 50px 20px; text-align: center; }
+        .up-dp-large { width: 130px; height: 130px; border-radius: 50%; object-fit: cover; border: 3px solid var(--bg-elevated); margin-bottom: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+        .up-name-large { font-size: 24px; font-weight: 800; color: var(--text-primary); margin-bottom: 6px; }
+        .up-id-badge { background: var(--bg-elevated); padding: 6px 12px; border-radius: 14px; font-size: 13px; color: var(--text-secondary); margin-bottom: 24px; font-weight: 600;}
+        .up-bio-box { font-size: 15px; color: var(--text-primary); line-height: 1.5; padding: 0 20px; margin-bottom: 35px; }
 
-        #call-screen { z-index: 150; background: rgba(0,0,0,0.8); backdrop-filter: blur(15px); position: absolute; top:0; left:0; width: 100%; height: 100%; display: none; flex-direction: column; }
+        /* CALL SCREENS */
+        #call-screen { z-index: 150; background: rgba(0,0,0,0.9); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); position: absolute; top:0; left:0; width: 100%; height: 100%; display: none; flex-direction: column; }
         #remote-video { width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: #000; z-index: 151;}
-        #local-video { width: 110px; height: 160px; position: absolute; bottom: 120px; right: 20px; border-radius: 16px; background: #222; cursor: grab; z-index: 152; box-shadow: 0 8px 25px rgba(0,0,0,0.5); overflow: hidden; border: 2px solid r        .menu-item i { font-size: 22px; color: var(--text-secondary); }
-        
-        .file-upload-wrapper { display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; }
-        .file-upload-wrapper img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 3px solid var(--border-color); }
-        .file-upload-wrapper input[type="file"] { display: none; }
-        .file-upload-wrapper label { background: var(--bg-elevated); padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text-primary); }
-
-        .tab-content { flex: 1; overflow-y: auto; display: none; background: var(--bg-base); }
-        .tab-content.active { display: block; }
-        .list-item { display: flex; align-items: center; padding: 12px 20px; cursor: pointer; transition: 0.2s; }
-        .list-item:active { background: var(--bg-elevated); }
-        .list-item img { width: 50px; height: 50px; border-radius: 50%; margin-right: 15px; object-fit: cover; }
-        .list-info { flex: 1; overflow: hidden; }
-        .list-name { font-weight: 600; font-size: 15px; display: flex; justify-content: space-between; align-items: center; color: var(--text-primary); }
-        .list-sub { font-size: 13px; color: var(--text-secondary); display: flex; justify-content: space-between; margin-top: 3px; }
-        .online-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); display: inline-block; margin-left: 5px; box-shadow: 0 0 5px var(--success); }
-        .offline-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-secondary); display: inline-block; margin-left: 5px; }
-        .unread-badge { background: var(--danger); color: white; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: bold; }
-
-        .status-bar { display: flex; gap: 15px; overflow-x: auto; padding: 15px 20px; border-bottom: 1px solid var(--border-color); background: var(--bg-base); scroll-behavior: smooth; }
-        .status-bar::-webkit-scrollbar { display: none; }
-        .status-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; min-width: 68px; }
-        .status-circle-container { width: 68px; height: 68px; border-radius: 50%; padding: 3px; background: var(--gradient-primary); margin-bottom: 6px; display: flex; justify-content: center; align-items: center; }
-        .status-circle-container.seen { background: var(--border-color); }
-        .status-circle-container.add-status { background: transparent; border: 2px dashed var(--text-secondary); padding: 2px; }
-        .status-circle { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid var(--bg-base); }
-        .add-status-icon { width: 100%; height: 100%; border-radius: 50%; background: var(--bg-surface); display: flex; justify-content: center; align-items: center; font-size: 24px; color: var(--text-secondary); border: 3px solid var(--bg-base); }
-        .status-name { font-size: 11px; color: var(--text-primary); text-align: center; width: 70px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500;}
-
-        /* POST & FEED UI */
-        .post-card { background: var(--bg-base); border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 10px; }
-        .post-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px;}
-        .post-user { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 14px; cursor: pointer; }
-        .post-user img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
-        .post-media { width: 100%; max-height: 450px; background: #000; display: flex; justify-content: center; align-items: center; }
-        .post-media img, .post-media video { width: 100%; max-height: 450px; object-fit: contain; }
-        .post-actions { padding: 12px 15px 8px; display: flex; gap: 18px; align-items: center; }
-        .post-btn { background: transparent; color: var(--text-primary); padding: 0; font-size: 26px; cursor: pointer; transition: 0.2s; border: none;}
-        .post-btn:active { transform: scale(0.9); color: var(--text-secondary); }
-        .post-likes-count { padding: 0 15px; font-size: 14px; font-weight: 600; margin-bottom: 5px;}
-        .post-caption { padding: 0 15px; font-size: 14px; line-height: 1.4; color: var(--text-primary); }
-
-        .bottom-nav { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--bg-base); border-top: 1px solid var(--border-color); z-index: 20; width: 100%; flex-shrink: 0; padding: 12px 0; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
-        .nav-item { color: var(--text-secondary); display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.2s; }
-        .nav-item.active { color: var(--text-primary); }
-        .nav-item i { font-size: 28px; transition: transform 0.2s; }
-        .nav-item.active i { transform: scale(1.1); font-weight: bold; }
-
-        #status-viewer-modal { background: #000; padding: 0; display: none; flex-direction: column; position: absolute; z-index: 200; width: 100%; height: 100%; top: 0; left: 0; }
-        #status-viewer-modal.active { display: flex; animation: fadeIn 0.2s ease forwards; }
-        .status-progress-container { display: flex; gap: 5px; padding: 10px; position: absolute; top: 0; width: 100%; z-index: 202; }
-        .status-progress-bar { flex: 1; height: 2px; background: rgba(255,255,255,0.3); border-radius: 2px; overflow: hidden; }
-        .status-progress-fill { width: 0%; height: 100%; background: #fff; transition: width 0.1s linear; }
-        .status-viewer-header { position: absolute; top: 15px; width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; z-index: 202; background: linear-gradient(to bottom, rgba(0,0,0,0.5), transparent); }
-        .status-viewer-user { display: flex; align-items: center; gap: 10px; color: #fff; font-size: 14px; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,0.8); cursor: pointer; }
-        .status-viewer-user img { width: 35px; height: 35px; border-radius: 50%; border: 1px solid #fff; }
-        .status-media-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; background: #111; position: relative; width: 100%; height: 100%; }
-        .status-media-wrapper img, .status-media-wrapper video { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
-        .status-viewer-footer { position: absolute; bottom: 0; width: 100%; padding: 25px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 202; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); }
-        .sv-action-btn { background: rgba(255,255,255,0.15); border: none; color: #fff; font-size: 24px; width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; backdrop-filter: blur(5px); }
-        .sv-action-btn.liked { color: var(--danger); }
-        .sv-view-count { color: #fff; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 6px; cursor: pointer; background: rgba(0,0,0,0.6); padding: 8px 16px; border-radius: 20px; backdrop-filter: blur(5px); }
-
-        #comments-modal .modal-content { height: 90vh; padding: 0; border-radius: 20px 20px 0 0; }
-        #comments-header { padding: 20px; border-bottom: 1px solid var(--border-color); text-align: center; font-weight: 600; position: relative; }
-        #close-comments-btn { position: absolute; left: 15px; top: 18px; font-size: 24px; }
-        #comments-list { flex: 1; overflow-y: auto; padding: 20px 15px; }
-        .comment-item { display: flex; gap: 12px; margin-bottom: 20px; }
-        .comment-item img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; cursor: pointer; }
-        .comment-content { flex: 1; }
-        .comment-author { font-weight: 600; font-size: 13px; margin-bottom: 2px; color: var(--text-primary); cursor: pointer; }
-        .comment-text { font-size: 14px; margin-bottom: 6px; word-wrap: break-word; color: #e0e0e0; }
-        .comment-actions { display: flex; gap: 12px; font-size: 12px; color: var(--text-secondary); font-weight: 500; }
-        .comment-actions span { cursor: pointer; }
-        .reply-thread { margin-left: 48px; margin-top: -5px;}
-        #comment-input-container { padding: 15px; border-top: 1px solid var(--border-color); background: var(--bg-surface); padding-bottom: calc(15px + env(safe-area-inset-bottom)); }
-
-        #chat-header { padding: 12px 15px; background: var(--bg-surface); justify-content: space-between; }
-        #chat-header img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; }
-        .chat-header-actions { display: flex; gap: 18px; margin-left: auto; }
-        .chat-messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; background: var(--bg-base); }
-        
-        /* Message Bubble & Media Updates */
-        .msg-bubble { max-width: 75%; padding: 12px 16px; border-radius: 20px; font-size: 14.5px; line-height: 1.4; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.2); user-select: none; position: relative;}
-        .msg-bubble img, .msg-bubble video { max-width: 100%; border-radius: 12px; margin-bottom: 5px; display: block; }
-        .msg-me { align-self: flex-end; background: var(--accent-color); color: #fff; border-bottom-right-radius: 4px; }
-        .msg-other { align-self: flex-start; background: var(--bg-elevated); color: var(--text-primary); border-bottom-left-radius: 4px; }
-        .msg-time { font-size: 10px; opacity: 0.7; margin-top: 5px; text-align: right; display: block; }
-        
-        #chat-input-wrapper { background: var(--bg-surface); border-top: 1px solid var(--border-color); padding-bottom: env(safe-area-inset-bottom); display: flex; flex-direction: column; width: 100%;}
-        #chat-media-preview-container { display: none; padding: 10px 15px; background: var(--bg-surface); border-bottom: 1px solid var(--border-color); justify-content: space-between; align-items: center; }
-        .chat-input-area { display: flex; gap: 10px; align-items: center; padding: 15px; }
-        .chat-input-area input[type="text"] { margin: 0; flex: 1; border-radius: 25px; padding: 12px 18px; background: var(--bg-base); }
-        .chat-input-area button { width: 45px; height: 45px; border-radius: 50%; padding: 0; display: flex; justify-content: center; align-items: center; background: var(--accent-color); }
-        .chat-attach-btn { background: transparent !important; color: var(--text-secondary) !important; padding: 0 !important; font-size: 26px !important; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; border-radius: 0 !important; width: auto !important; height: auto !important;}
-        .chat-attach-btn:active { transform: scale(0.9); }
-
-        #user-profile-modal .modal-content { align-items: center; padding: 40px 20px; text-align: center; }
-        .up-dp-large { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--bg-elevated); margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        .up-name-large { font-size: 22px; font-weight: 700; color: var(--text-primary); margin-bottom: 5px; }
-        .up-id-badge { background: var(--bg-elevated); padding: 4px 10px; border-radius: 12px; font-size: 12px; color: var(--text-secondary); margin-bottom: 20px; font-weight: 500;}
-        .up-bio-box { font-size: 14px; color: var(--text-primary); line-height: 1.5; padding: 0 20px; margin-bottom: 30px; }
-
-        #call-screen { z-index: 150; background: rgba(0,0,0,0.8); backdrop-filter: blur(15px); position: absolute; top:0; left:0; width: 100%; height: 100%; display: none; flex-direction: column; }
-        #remote-video { width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: #000; z-index: 151;}
-        #local-video { width: 110px; height: 160px; position: absolute; bottom: 120px; right: 20px; border-radius: 16px; background: #222; cursor: grab; z-index: 152; box-shadow: 0 8px 25px rgba(0,0,0,0.5); overflow: hidden; border: 2px solid rgba(255,255,255,0.1); }
-        .call-controls { position: absolute; bottom: 40px; left: 0; width: 100%; display: flex; justify-content: center; gap: 25px; z-index: 153; }
-        .call-controls button { width: 65px; height: 65px; border-radius: 50%; font-size: 28px; display: flex; justify-content: center; align-items: center; background: var(--bg-glass); backdrop-filter: blur(10px); color: white; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: 0.3s; }
+        #local-video { width: 120px; height: 170px; position: absolute; bottom: 130px; right: 20px; border-radius: 18px; background: #222; cursor: grab; z-index: 152; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden; border: 2px solid rgba(255,255,255,0.1); }
+        .call-controls { position: absolute; bottom: 40px; left: 0; width: 100%; display: flex; justify-content: center; gap: 30px; z-index: 153; padding-bottom: env(safe-area-inset-bottom); }
+        .call-controls button { width: 70px; height: 70px; border-radius: 50%; font-size: 30px; display: flex; justify-content: center; align-items: center; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); color: white; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: 0.3s; }
         .call-controls button:active { transform: scale(0.9); }
         .call-controls button.active-control { background: #fff; color: #000; }
         
         #voice-call-ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 151; }
-        .caller-avatar-large { width: 140px; height: 140px; border-radius: 50%; margin-bottom: 25px; object-fit: cover; animation: pulse 2s infinite; box-shadow: 0 0 0 0 rgba(0, 149, 246, 0.7); }
-        @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 149, 246, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 30px rgba(0, 149, 246, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 149, 246, 0); } }
+        .caller-avatar-large { width: 150px; height: 150px; border-radius: 50%; margin-bottom: 30px; object-fit: cover; animation: pulse 2s infinite; box-shadow: 0 0 0 0 rgba(0, 149, 246, 0.7); }
+        @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 149, 246, 0.7); } 70% { transform: scale(1.05); box-shadow: 0 0 0 40px rgba(0, 149, 246, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 149, 246, 0); } }
 
+        /* UTILS */
         .blue-tick { display: inline-flex; align-items: center; justify-content: center; margin-left: 5px; vertical-align: middle; color: var(--accent-color); font-size: 1.1em;}
         .blue-tick svg { width: 16px; height: 16px; fill: currentColor; }
-
-        .dropdown-menu { display: none; position: absolute; right: 10px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.8); z-index: 200; }
-        .dropdown-menu div { padding: 14px 20px; cursor: pointer; font-size: 14px; font-weight: 500; display:flex; align-items:center; gap:10px; }
-        .dropdown-menu div:hover { background: var(--bg-elevated); }
-        
-        .admin-tab-btns { display: flex; gap: 10px; margin-bottom: 15px; }
-        .admin-tab-btns button { padding: 8px; font-size: 12px; }
+        .dropdown-menu { display: none; position: absolute; right: 16px; background: var(--bg-elevated); border: 1px solid var(--border-light); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 200; }
+        .dropdown-menu div { padding: 16px 24px; cursor: pointer; font-size: 15px; font-weight: 600; display:flex; align-items:center; gap:12px; transition: background 0.2s; }
+        .dropdown-menu div:hover { background: #2a2a2a; }
+        .file-upload-wrapper { display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; }
+        .file-upload-wrapper img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 2px solid var(--border-light); }
+        .file-upload-wrapper input[type="file"] { display: none; }
+        .file-upload-wrapper label { background: var(--bg-elevated); padding: 10px 20px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--text-primary); border: 1px solid var(--border-light); transition: 0.2s; }
+        .file-upload-wrapper label:active { background: var(--border-color); }
+        .admin-tab-btns { display: flex; gap: 12px; margin-bottom: 20px; }
+        .admin-tab-btns button { padding: 10px; font-size: 13px; }
         .admin-tab-btns button.active { background: var(--bg-elevated); }
-        .admin-user-item { display:flex; justify-content:space-between; align-items:center; background:var(--bg-elevated); padding:10px; border-radius:8px; margin-bottom:10px; }
+        .admin-user-item { display:flex; justify-content:space-between; align-items:center; background:var(--bg-elevated); padding:12px 16px; border-radius:12px; margin-bottom:12px; }
+
+        /* NOTIFICATIONS UI - Perfectly positioned to stay on screen */
+        .notification-dropdown {
+            position: absolute;
+            top: 60px;
+            right: 15px;
+            width: 320px;
+            max-width: 90vw;
+            background: #1a1a1a;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+            overflow-y: auto;
+            max-height: 450px;
+            z-index: 1000;
+            border: 1px solid var(--border-light);
+            display: none;
+            flex-direction: column;
+        }
+        .noti-header { padding: 16px !important; font-size: 16px !important; font-weight: 700 !important; cursor: default !important; justify-content: flex-start !important; border-bottom: 1px solid var(--border-light); position: sticky; top: 0; background: var(--bg-elevated); z-index: 5; }
+        .noti-item { padding: 14px 16px !important; display: flex !important; align-items: center !important; gap: 12px !important; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid var(--border-color); }
+        .noti-item:hover { background: var(--bg-surface) !important; }
+        .noti-item.unread { background: rgba(0, 149, 246, 0.12) !important; }
+        .noti-item img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-light); flex-shrink: 0; }
+        .noti-content { flex: 1; font-size: 13px; color: var(--text-primary); line-height: 1.4; display: flex; flex-direction: column; align-items: flex-start !important; font-weight: 400 !important; }
+        .noti-content b { font-weight: 600; color: var(--text-primary); }
+        .noti-time { color: var(--text-secondary); font-size: 11px; margin-top: 4px; font-weight: 500; }
     </style>
 </head>
 <body>
 
-<div id="app-wrapper">
     <!-- Auth Screen -->
     <div id="auth-screen" class="screen active">
-        <div class="auth-logo brand-text">Whistachat</div>
-        <div style="background: var(--bg-glass); padding: 30px 20px; border-radius: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); width: 100%;">
+        <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 15px;">
+            <div class="auth-logo brand-gradient-text" style="margin-bottom: 40px;">Whistachat</div>
+        </div>
+        <div style="background: var(--bg-elevated); padding: 35px 25px; border-radius: 24px; border: 1px solid var(--border-color); width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
             <form id="auth-form">
                 <input type="email" id="auth-email" placeholder="Email" required>
                 <div class="input-group">
                     <input type="password" id="auth-password" placeholder="Password" required>
                     <span id="toggle-password" class="toggle-password">SHOW</span>
                 </div>
-                <button type="submit" id="auth-btn">Log In</button>
+                <button type="submit" id="auth-btn" style="margin-top: 10px;">Log In</button>
             </form>
             <div class="toggle-auth" id="toggle-auth-btn">Don't have an account? Sign up</div>
         </div>
@@ -368,7 +335,7 @@
                 <input type="file" id="setup-dp-input" accept="image/*, video/*">
             </div>
             <input type="text" id="setup-name" placeholder="Display Name (max 20)" maxlength="20" required>
-            <textarea id="setup-bio" placeholder="Bio (max 100)" maxlength="100"></textarea>
+            <textarea id="setup-bio" placeholder="Bio (max 100)" maxlength="100" rows="3"></textarea>
             <button id="save-setup-btn">Complete Setup</button>
         </div>
     </div>
@@ -376,7 +343,23 @@
     <!-- Main Application Screen -->
     <div id="main-screen" class="screen">
         <div class="header" id="main-header">
-            <button class="action-btn" id="open-menu-btn"><i class="ph ph-list"></i></button>
+            <div class="brand-text brand-gradient-text">Whistachat</div>
+            <div class="header-actions">
+                <div style="display: flex; align-items: center; justify-content: center; position: relative;">
+                    <button class="action-btn" id="noti-btn"><i class="ph ph-heart"></i></button>
+                    <span id="noti-badge" style="display:none; position:absolute; top:-2px; right:-2px; background:var(--danger); color:#fff; font-size:10px; font-weight:bold; border-radius:50%; padding:2px 5px; pointer-events: none;">0</span>
+                </div>
+                <button class="action-btn" onclick="document.querySelector('.nav-item[data-tab=\'tab-chats\']').click()"><i class="ph ph-messenger-logo"></i></button>
+                <button class="action-btn" id="open-menu-btn"><i class="ph ph-list"></i></button>
+            </div>
+            
+            <!-- Notification Dropdown anchored to header right edge safely -->
+            <div id="noti-dropdown" class="notification-dropdown">
+                <div class="noti-header">Notifications</div>
+                <div id="noti-list" style="display:flex; flex-direction:column;">
+                    <!-- Notification Items -->
+                </div>
+            </div>
         </div>
 
         <!-- Feed Tab -->
@@ -388,23 +371,23 @@
                     </div>
                     <div class="status-name" style="color: var(--text-secondary);">Your Story</div>
                 </div>
-                <div id="status-list" style="display:flex; gap:15px;"></div>
+                <div id="status-list" style="display:flex; gap:16px;"></div>
             </div>
-            <div style="padding: 15px;">
-                <button id="show-create-post-btn" style="background: var(--bg-elevated); color: var(--text-primary); border: 1px solid var(--border-color);"><i class="ph ph-plus-square"></i> Create Post</button>
+            <div style="padding: 16px;">
+                <button id="show-create-post-btn" style="background: var(--bg-elevated); color: var(--text-primary); border: 1px solid var(--border-color); font-weight: 600;"><i class="ph ph-plus-square"></i> Create Post</button>
             </div>
             <div id="feed-list"></div>
         </div>
 
         <!-- Chats Tab -->
         <div id="tab-chats" class="tab-content">
-            <div style="padding: 15px 20px; font-size: 18px; font-weight: 700;">Messages</div>
+            <div style="padding: 16px 20px; font-size: 20px; font-weight: 800; border-bottom: 1px solid var(--border-color);">Messages</div>
             <div id="contacts-list"></div>
         </div>
 
         <!-- Requests Tab -->
         <div id="tab-requests" class="tab-content">
-            <div style="padding: 15px 20px;">
+            <div style="padding: 16px 20px; border-bottom: 1px solid var(--border-color);">
                 <button id="show-add-friend-btn" class="btn-secondary"><i class="ph ph-user-plus"></i> Add Friend by ID</button>
             </div>
             <div id="requests-list"></div>
@@ -412,7 +395,7 @@
 
         <!-- Calls Tab -->
         <div id="tab-calls" class="tab-content">
-            <div style="padding: 15px 20px; font-size: 18px; font-weight: 700;">Recent Calls</div>
+            <div style="padding: 16px 20px; font-size: 20px; font-weight: 800; border-bottom: 1px solid var(--border-color);">Recent Calls</div>
             <div id="call-logs-list"></div>
         </div>
 
@@ -435,8 +418,8 @@
     <div id="side-menu">
         <div class="profile-summary">
             <img id="my-profile-pic" src="">
-            <div id="my-profile-name-display" style="font-weight: 600; font-size: 18px; display: flex; justify-content: center; align-items: center;"></div>
-            <div id="my-profile-id" style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;"></div>
+            <div id="my-profile-name-display" style="font-weight: 700; font-size: 20px; display: flex; justify-content: center; align-items: center;"></div>
+            <div id="my-profile-id" style="font-size: 14px; color: var(--text-secondary); margin-top: 6px; font-weight: 500;"></div>
         </div>
         <div class="menu-item" id="menu-edit-profile"><i class="ph ph-pencil-simple"></i> Edit Profile</div>
         <div class="menu-item" id="menu-request-verify" style="color: var(--accent-color);"><i class="ph-fill ph-seal-check"></i> Get Verified</div>
@@ -451,11 +434,11 @@
             <div class="modal-header">New Story</div>
             <div id="status-upload-section">
                 <input type="file" id="status-media-input" accept="image/*, video/*" style="display:none;">
-                <button id="select-status-media-btn" class="btn-secondary" style="margin-bottom: 15px;"><i class="ph ph-image"></i> Select Media</button>
-                <div id="status-media-preview" style="display:none; text-align:center; margin-bottom:15px; color:var(--accent-color); font-size:12px;"></div>
+                <button id="select-status-media-btn" class="btn-secondary" style="margin-bottom: 16px;"><i class="ph ph-image"></i> Select Media</button>
+                <div id="status-media-preview" style="display:none; text-align:center; margin-bottom:16px; color:var(--accent-color); font-size:13px; font-weight: 500;"></div>
             </div>
-            <button id="submit-status-btn" style="margin-bottom: 10px;">Share to Story</button>
-            <div id="status-progress" style="display:none; text-align:center; font-size:12px; margin-bottom:10px; color:var(--accent-color);">Uploading...</div>
+            <button id="submit-status-btn" style="margin-bottom: 12px;">Share to Story</button>
+            <div id="status-progress" style="display:none; text-align:center; font-size:13px; margin-bottom:12px; color:var(--accent-color); font-weight: 500;">Uploading...</div>
             <button class="btn-secondary close-modal">Cancel</button>
         </div>
     </div>
@@ -467,9 +450,9 @@
                 <img id="sv-user-dp" src="">
                 <span id="sv-user-name"></span>
             </div>
-            <div style="display:flex; gap:15px; align-items:center;">
-                <button id="sv-delete-btn" style="display:none; background:none; border:none; color:#fff; font-size:24px; cursor:pointer;"><i class="ph ph-trash"></i></button>
-                <button id="sv-close-btn" style="background:none; border:none; color:#fff; font-size:28px; cursor:pointer;"><i class="ph ph-x"></i></button>
+            <div style="display:flex; gap:16px; align-items:center;">
+                <button id="sv-delete-btn" style="display:none; background:none; border:none; color:#fff; font-size:26px; cursor:pointer;"><i class="ph ph-trash"></i></button>
+                <button id="sv-close-btn" style="background:none; border:none; color:#fff; font-size:30px; cursor:pointer;"><i class="ph ph-x"></i></button>
             </div>
         </div>
         <div class="status-media-wrapper" id="sv-media-wrapper">
@@ -478,7 +461,7 @@
         </div>
         <div class="status-viewer-footer">
             <button class="sv-action-btn" id="sv-like-btn"><i class="ph ph-heart"></i></button>
-            <div style="display:flex; gap:15px; align-items:center;">
+            <div style="display:flex; gap:16px; align-items:center;">
                 <span class="sv-view-count" id="sv-views-count" style="display:none;"><i class="ph ph-eye"></i> <span>0</span></span>
                 <button class="sv-action-btn" id="sv-download-btn"><i class="ph ph-download-simple"></i></button>
             </div>
@@ -508,9 +491,9 @@
         <div class="header" id="chat-header">
             <button class="action-btn" id="close-chat-btn"><i class="ph ph-caret-left"></i></button>
             <img id="chat-user-dp" src="" style="margin-left:5px;">
-            <div style="display: flex; flex-direction: column; margin-left: 10px; cursor: pointer; flex: 1;" id="chat-header-profile-trigger">
-                <span id="chat-user-name" style="font-size: 15px; font-weight: 600; display:flex; align-items:center;"></span>
-                <span id="chat-user-status" style="font-size: 11px; font-weight: normal; color: var(--text-secondary);"></span>
+            <div style="display: flex; flex-direction: column; margin-left: 12px; cursor: pointer; flex: 1;" id="chat-header-profile-trigger">
+                <span id="chat-user-name" style="font-size: 16px; font-weight: 700; display:flex; align-items:center;"></span>
+                <span id="chat-user-status" style="font-size: 12px; font-weight: 500; color: var(--text-secondary);"></span>
             </div>
             <div class="chat-header-actions">
                 <button class="action-btn" id="start-voice-call"><i class="ph ph-phone"></i></button>
@@ -525,13 +508,13 @@
             </div>
         </div>
         
-        <div class="chat-messages" id="chat-messages"><div class="typing-indicator" id="chat-typing-indicator">Typing...</div></div>
+        <div class="chat-messages" id="chat-messages"><div class="typing-indicator" id="chat-typing-indicator" style="color: var(--text-secondary); font-size: 13px; padding: 5px;">Typing...</div></div>
         
         <!-- Media Upload Preview Bar -->
         <div id="chat-input-wrapper">
             <div id="chat-media-preview-container">
-                <span id="chat-media-preview-text" style="font-size: 13px; color: var(--accent-color); font-weight: 500;"></span>
-                <button id="chat-media-cancel-btn" style="background: transparent; color: var(--danger); width: auto; padding: 0; font-size: 20px; display: flex;"><i class="ph ph-x-circle"></i></button>
+                <span id="chat-media-preview-text" style="font-size: 14px; color: var(--accent-color); font-weight: 600;"></span>
+                <button id="chat-media-cancel-btn" style="background: transparent; color: var(--danger); width: auto; padding: 0; font-size: 24px; display: flex;"><i class="ph ph-x-circle"></i></button>
             </div>
             <!-- Standard Chat Input -->
             <div class="chat-input-area" id="chat-input-area">
@@ -542,7 +525,7 @@
             </div>
         </div>
         
-        <div id="blocked-banner" style="display:none; text-align:center; padding:15px; background:var(--bg-elevated); color:var(--danger); font-size:14px; font-weight:500;">You cannot reply to this conversation.</div>
+        <div id="blocked-banner" style="display:none; text-align:center; padding:16px; background:var(--bg-elevated); color:var(--danger); font-size:15px; font-weight:600;">You cannot reply to this conversation.</div>
     </div>
 
     <!-- ... rest of Modals ... -->
@@ -551,12 +534,12 @@
             <div class="modal-header" id="post-modal-title">Create Post</div>
             <div id="post-upload-section">
                 <input type="file" id="post-media-input" accept="image/*, video/*" style="display:none;">
-                <button id="select-media-btn" class="btn-secondary" style="margin-bottom: 15px;"><i class="ph ph-image"></i> Select Media</button>
-                <div id="post-media-preview" style="display:none; text-align:center; margin-bottom:15px; color:var(--accent-color); font-size:12px;"></div>
+                <button id="select-media-btn" class="btn-secondary" style="margin-bottom: 16px;"><i class="ph ph-image"></i> Select Media</button>
+                <div id="post-media-preview" style="display:none; text-align:center; margin-bottom:16px; color:var(--accent-color); font-size:13px; font-weight:500;"></div>
             </div>
             <textarea id="post-caption" placeholder="Write a caption..." rows="3"></textarea>
-            <button id="submit-post-btn" style="margin-bottom: 10px;">Post</button>
-            <div id="post-progress" style="display:none; text-align:center; font-size:12px; margin-bottom:10px; color:var(--accent-color);">Uploading: 0%</div>
+            <button id="submit-post-btn" style="margin-bottom: 12px;">Post</button>
+            <div id="post-progress" style="display:none; text-align:center; font-size:13px; margin-bottom:12px; color:var(--accent-color); font-weight:500;">Uploading: 0%</div>
             <button class="btn-secondary close-modal">Cancel</button>
         </div>
     </div>
@@ -569,10 +552,10 @@
             </div>
             <div id="comments-list"></div>
             <div id="comment-input-container">
-                <div id="replying-to-banner" style="display:none; justify-content:space-between; align-items:center; padding:10px; font-size:12px; color:var(--text-secondary); background:var(--bg-elevated); border-radius:10px; margin-bottom:10px;"><span id="replying-to-text"></span><span id="cancel-reply-btn" style="cursor:pointer; color:var(--danger); font-size:18px;"><i class="ph ph-x-circle"></i></span></div>
+                <div id="replying-to-banner"><span id="replying-to-text"></span><span id="cancel-reply-btn"><i class="ph ph-x-circle"></i></span></div>
                 <div class="chat-input-area" style="padding:0; border:none; background:transparent;">
                     <input type="text" id="comment-input" placeholder="Add a comment...">
-                    <button id="send-comment-btn" style="background:transparent; color:var(--accent-color); width:auto; font-size:24px;"><i class="ph-fill ph-paper-plane-right"></i></button>
+                    <button id="send-comment-btn" style="background:transparent; color:var(--accent-color); width:auto; font-size:28px;"><i class="ph-fill ph-paper-plane-right"></i></button>
                 </div>
             </div>
         </div>
@@ -587,8 +570,8 @@
                 <input type="file" id="edit-dp-input" accept="image/*, video/*">
             </div>
             <input type="text" id="edit-name" placeholder="Name" maxlength="20">
-            <textarea id="edit-bio" placeholder="Bio" maxlength="100"></textarea>
-            <button id="save-edit-btn" style="margin-bottom: 10px;">Save</button>
+            <textarea id="edit-bio" placeholder="Bio" maxlength="100" rows="3"></textarea>
+            <button id="save-edit-btn" style="margin-bottom: 12px;">Save</button>
             <button class="btn-secondary close-modal">Cancel</button>
         </div>
     </div>
@@ -597,8 +580,8 @@
         <div class="modal-content" style="height: auto;">
             <div class="modal-header">Find User</div>
             <input type="text" id="search-userid" placeholder="User ID (e.g. SK-1024)" style="text-transform: uppercase;">
-            <button id="search-friend-btn" style="margin-bottom: 10px;">Search</button>
-            <div id="search-result" style="margin-bottom: 10px; text-align: center; font-size: 14px;"></div>
+            <button id="search-friend-btn" style="margin-bottom: 16px;">Search</button>
+            <div id="search-result" style="margin-bottom: 16px; text-align: center; font-size: 15px; font-weight: 500;"></div>
             <button class="btn-secondary close-modal">Close</button>
         </div>
     </div>
@@ -613,14 +596,14 @@
     </div>
 
     <!-- Call Screens -->
-    <div id="incoming-call-modal" class="modal" style="background: rgba(0,0,0,0.85); backdrop-filter: blur(20px);">
-        <div class="modal-content" style="background: transparent; height: 100%; justify-content: center; align-items: center; border:none; color:white;">
-            <div id="incoming-type" style="color: var(--text-secondary); margin-bottom: 10px; font-size:14px; text-transform:uppercase; letter-spacing:2px;">Incoming Call</div>
+    <div id="incoming-call-modal" class="modal" style="background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
+        <div class="modal-content" style="background: transparent; height: 100%; justify-content: center; align-items: center; border:none; color:white; box-shadow: none;">
+            <div id="incoming-type" style="color: var(--text-secondary); margin-bottom: 16px; font-size:15px; text-transform:uppercase; letter-spacing:3px; font-weight: 600;">Incoming Call</div>
             <img id="incoming-avatar" class="caller-avatar-large" src="">
-            <div id="incoming-name" style="font-size: 28px; font-weight: 700; margin-bottom: 50px;"></div>
-            <div style="display: flex; gap: 40px;">
-                <button id="reject-call-btn" style="background: var(--danger); border-radius: 50%; width: 65px; height: 65px; font-size: 28px; display:flex; align-items:center; justify-content:center; color:white; border:none;"><i class="ph-fill ph-phone-disconnect"></i></button>
-                <button id="accept-call-btn" style="background: var(--success); border-radius: 50%; width: 65px; height: 65px; font-size: 28px; display:flex; align-items:center; justify-content:center; color:white; border:none;"><i class="ph-fill ph-phone"></i></button>
+            <div id="incoming-name" style="font-size: 32px; font-weight: 800; margin-bottom: 60px; text-align: center;"></div>
+            <div style="display: flex; gap: 50px;">
+                <button id="reject-call-btn" style="background: var(--danger); border-radius: 50%; width: 75px; height: 75px; font-size: 32px; display:flex; align-items:center; justify-content:center; color:white; border:none; box-shadow: 0 10px 20px rgba(255, 48, 64, 0.4);"><i class="ph-fill ph-phone-disconnect"></i></button>
+                <button id="accept-call-btn" style="background: var(--success); border-radius: 50%; width: 75px; height: 75px; font-size: 32px; display:flex; align-items:center; justify-content:center; color:white; border:none; box-shadow: 0 10px 20px rgba(0, 186, 124, 0.4);"><i class="ph-fill ph-phone"></i></button>
             </div>
         </div>
     </div>
@@ -628,8 +611,8 @@
     <div id="call-screen">
         <div id="voice-call-ui">
             <img id="active-call-avatar" class="caller-avatar-large" src="">
-            <div id="active-call-name" style="font-size: 28px; font-weight: 700; color:white;"></div>
-            <div id="active-call-status" style="color: rgba(255,255,255,0.7); margin-top: 10px; font-size:14px;">Connecting...</div>
+            <div id="active-call-name" style="font-size: 32px; font-weight: 800; color:white; text-align: center;"></div>
+            <div id="active-call-status" style="color: rgba(255,255,255,0.7); margin-top: 12px; font-size:16px; font-weight: 500;">Connecting...</div>
         </div>
         <div id="remote-video"></div>
         <div id="local-video"></div>
@@ -670,6 +653,10 @@
     let iBlockedThem = false, theyBlockedMe = false, unsubscribeBlockMe = null, unsubscribeBlockThem = null;
     let currentSetupDpUrl = null, currentEditDpUrl = null;
     
+    // Notifications State
+    let notificationsData = [];
+    let unreadNotiCount = 0;
+    
     // Chat Media Variables
     let chatUploadFile = null, chatUploadBlob = null;
     
@@ -700,6 +687,20 @@
         } catch (e) { console.error("Push Error:", e); }
     }
 
+    // Helper: Create an internal DB notification
+    async function createNotification(targetUid, type, fromUid, relatedId = null, extraText = null) {
+        if (targetUid === fromUid) return; // Don't notify self
+        const notiRef = ref(db, `notifications/${targetUid}`);
+        await push(notiRef, {
+            type: type,
+            fromUid: fromUid,
+            relatedId: relatedId,
+            text: extraText,
+            timestamp: serverTimestamp(),
+            read: false
+        });
+    }
+
     function renderNameWithBadge(userObj) { return userObj.name + (userObj.isVerified ? verifiedBadgeSVG : ''); }
     function formatTime(ts) { if(!ts) return ''; const d = new Date(ts); return d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); }
     function formatLastSeen(ts) {
@@ -707,6 +708,14 @@
         if(mins < 1) return "Online just now"; if(mins < 60) return `Active ${mins}m ago`;
         const hrs = Math.floor(mins / 60); if(hrs < 24) return `Active ${hrs}h ago`;
         const days = Math.floor(hrs / 24); if(days === 1) return "Active yesterday"; return `Active ${new Date(ts).toLocaleDateString()}`;
+    }
+    function formatTimeAgo(ts) {
+        if(!ts) return '';
+        const diff = Math.floor((Date.now() - ts) / 1000);
+        if (diff < 60) return `${diff}s ago`;
+        if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+        if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+        return `${Math.floor(diff/86400)}d ago`;
     }
 
     async function uploadToCloudinary(file){
@@ -731,7 +740,7 @@
     function stopRingtones() { try{ if(incomingRingLoop) incomingRingLoop.stop(); if(outgoingRingLoop) outgoingRingLoop.stop(); }catch(e){} }
 
     document.querySelectorAll('.close-modal').forEach(btn => { btn.addEventListener('click', (e) => { e.target.closest('.modal').classList.remove('active'); }); });
-    el('open-menu-btn').addEventListener('click', () => { el('side-menu').classList.add('open'); el('menu-overlay').classList.add('active'); });
+    el('open-menu-btn').addEventListener('click', (e) => { e.stopPropagation(); el('side-menu').classList.add('open'); el('menu-overlay').classList.add('active'); });
     el('menu-overlay').addEventListener('click', () => { el('side-menu').classList.remove('open'); el('menu-overlay').classList.remove('active'); });
     
     document.querySelectorAll('.nav-item').forEach(item => {
@@ -754,8 +763,6 @@
         e.preventDefault(); 
         
         // --- VITAL NOTIFICATION FIX ---
-        // Browsers block Push Prompts unless they happen immediately after a User Interaction. 
-        // This is the click event, so it is allowed to trigger the prompt correctly here.
         if (window.OneSignalDeferred) {
             OneSignalDeferred.push(async function(OneSignal) {
                 if (OneSignal.Notifications && OneSignal.Notifications.permission !== "granted") {
@@ -842,9 +849,9 @@
         el('my-profile-pic').src = myProfile.dpUrl || defaultAvatarSvg;
         if (isAdmin) el('menu-admin-panel').style.display = 'flex'; else el('menu-admin-panel').style.display = 'none';
         
-        initPresence(); loadContacts(); loadRequests(); loadCallLogs(); listenIncomingCalls(); loadFeed(); loadStatuses(); 
+        initPresence(); loadContacts(); loadRequests(); loadCallLogs(); listenIncomingCalls(); loadFeed(); loadStatuses(); loadNotifications(); 
 
-        // Additional Fallback for Notification Request via the soft slide-down
+        // Additional Fallback for Notification Request
         if (window.OneSignalDeferred) {
             OneSignalDeferred.push(async function(OneSignal) {
                 if (OneSignal.Notifications && OneSignal.Notifications.permission !== "granted") {
@@ -853,6 +860,115 @@
             });
         }
     }
+
+    // --- NOTIFICATION CENTER LOGIC ---
+    function loadNotifications() {
+        onValue(ref(db, `notifications/${currentUser.uid}`), async (snap) => {
+            const listEl = el('noti-list');
+            listEl.innerHTML = '';
+            notificationsData = [];
+            unreadNotiCount = 0;
+
+            if (!snap.exists()) {
+                listEl.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary); font-size: 13px;">No notifications yet</div>';
+                el('noti-badge').style.display = 'none';
+                return;
+            }
+
+            snap.forEach(c => {
+                const data = c.val();
+                notificationsData.push({ id: c.key, ...data });
+                if (!data.read) unreadNotiCount++;
+            });
+
+            // Update badge
+            const badge = el('noti-badge');
+            if (unreadNotiCount > 0) {
+                badge.textContent = unreadNotiCount > 99 ? '99+' : unreadNotiCount;
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+
+            // Sort descending
+            notificationsData.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+            for (const noti of notificationsData) {
+                const user = await getUserData(noti.fromUid);
+                const div = document.createElement('div');
+                div.className = `noti-item ${noti.read ? '' : 'unread'}`;
+                
+                let notiText = '';
+
+                if (noti.type === 'like') {
+                    notiText = `liked your post.`;
+                } else if (noti.type === 'comment') {
+                    notiText = `commented: "${noti.text}"`;
+                } else if (noti.type === 'request') {
+                    notiText = `sent you a friend request.`;
+                } else if (noti.type === 'view') {
+                    notiText = `viewed your story.`;
+                }
+
+                div.innerHTML = `
+                    <img src="${user.dpUrl}" alt="dp">
+                    <div class="noti-content">
+                        <span><b>${user.name}</b> ${notiText}</span>
+                        <div class="noti-time">${formatTimeAgo(noti.timestamp)}</div>
+                    </div>
+                `;
+                
+                div.onclick = (e) => {
+                    e.stopPropagation();
+                    el('noti-dropdown').style.display = 'none';
+                    if (noti.type === 'like' || noti.type === 'comment') {
+                        openComments(noti.relatedId, currentUser.uid);
+                    } else if (noti.type === 'request') {
+                        document.querySelector('.nav-item[data-tab="tab-requests"]').click();
+                    } else if (noti.type === 'view') {
+                        openStatusViewer(currentUser.uid);
+                    }
+                };
+                listEl.appendChild(div);
+            }
+        });
+    }
+
+    el('noti-btn').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const dropdown = el('noti-dropdown');
+        const isClosing = dropdown.style.display === 'flex';
+        
+        // Close other dropdowns
+        document.querySelectorAll('.dropdown-menu, .notification-dropdown').forEach(menu => { if(menu !== dropdown) menu.style.display = 'none'; });
+
+        if (isClosing) {
+            dropdown.style.display = 'none';
+        } else {
+            dropdown.style.display = 'flex';
+            
+            // Mark as read
+            if (unreadNotiCount > 0) {
+                const updates = {};
+                notificationsData.forEach(noti => {
+                    if (!noti.read) {
+                        updates[`${noti.id}/read`] = true;
+                    }
+                });
+                if(Object.keys(updates).length > 0){
+                    update(ref(db, `notifications/${currentUser.uid}`), updates);
+                }
+            }
+        }
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', () => { 
+        el('post-menu-dropdown').style.display = 'none'; 
+        el('chat-menu-dropdown').style.display = 'none'; 
+        if(el('noti-dropdown')) el('noti-dropdown').style.display = 'none';
+    });
+
 
     window.showUserProfile = async function(uid) {
         const user = await getUserData(uid);
@@ -949,7 +1065,7 @@
             for(let uid in allGroupedStatuses) { allGroupedStatuses[uid].sort((a,b) => a.createdAt - b.createdAt); }
 
             if(allGroupedStatuses[currentUser.uid]) {
-                el('add-status-btn').innerHTML = `<div class="status-circle-container"><img class="status-circle" src="${myProfile.dpUrl}"></div><div class="status-name">Your Story</div>`;
+                el('add-status-btn').innerHTML = `<div class="status-circle-container"><img class="status-circle" src="${myProfile.dpUrl}"></div><div class="status-name" style="color: var(--text-primary); font-weight: 600;">Your Story</div>`;
             } else {
                 el('add-status-btn').innerHTML = `<div class="status-circle-container add-status"><div class="add-status-icon"><i class="ph ph-plus"></i></div></div><div class="status-name" style="color:var(--text-secondary)">Your Story</div>`;
             }
@@ -1008,6 +1124,7 @@
 
         if(!isMyStatus && (!currentStatusObj.views || !currentStatusObj.views[currentUser.uid])) {
             await update(ref(db, `statuses/${currentStatusObj.statusId}/views`), { [currentUser.uid]: Date.now() });
+            createNotification(currentStatusObj.userId, 'view', currentUser.uid, currentStatusObj.statusId);
         }
 
         const likeBtn = el('sv-like-btn');
@@ -1131,11 +1248,14 @@
         el('submit-post-btn').disabled = false; el('post-progress').style.display = 'none'; el('post-modal').classList.remove('active');
     });
 
-    window.toggleLike = async function(postId) {
+    window.toggleLike = async function(postId, authorId) {
         const likeRef = ref(db, `posts/${postId}/likes/${currentUser.uid}`);
         const snap = await get(likeRef);
         if(snap.exists()) await remove(likeRef);
-        else await set(likeRef, true);
+        else {
+            await set(likeRef, true);
+            createNotification(authorId, 'like', currentUser.uid, postId);
+        }
     };
 
     window.sharePost = function(mediaUrl, caption) {
@@ -1163,7 +1283,7 @@
                 card.innerHTML = `<div class="post-header"><div class="post-user" onclick="showUserProfile('${author.uid}')"><img src="${author.dpUrl}"> ${renderNameWithBadge(author)}</div>${actionMenu}</div>
                     <div class="post-media">${mediaHtml}</div>
                     <div class="post-actions">
-                        <button class="post-btn" onclick="toggleLike('${post.id}')"><i class="${isLiked ? 'ph-fill ph-heart' : 'ph ph-heart'}" style="${isLiked ? 'color:var(--danger)' : ''}"></i></button>
+                        <button class="post-btn" onclick="toggleLike('${post.id}', '${post.authorId}')"><i class="${isLiked ? 'ph-fill ph-heart' : 'ph ph-heart'}"></i></button>
                         <button class="post-btn" onclick="openComments('${post.id}', '${post.authorId}')"><i class="ph ph-chat-circle"></i></button>
                         <button class="post-btn" onclick="sharePost('${post.mediaUrl}', '${post.caption ? post.caption.replace(/'/g, "\\'") : ''}')"><i class="ph ph-paper-plane-tilt"></i></button>
                     </div>
@@ -1176,7 +1296,6 @@
 
     let activeDropdownPostId = null;
     window.openPostMenu = function(e, postId) { e.stopPropagation(); activeDropdownPostId = postId; const menu = el('post-menu-dropdown'); menu.style.top = (e.clientY) + 'px'; menu.style.right = '20px'; menu.style.display = 'block'; }
-    document.addEventListener('click', () => { el('post-menu-dropdown').style.display = 'none'; el('chat-menu-dropdown').style.display = 'none'; });
     
     el('delete-post-btn').addEventListener('click', async () => { if(activeDropdownPostId && confirm("Delete post?")) { await remove(ref(db, `posts/${activeDropdownPostId}`)); await remove(ref(db, `comments/${activeDropdownPostId}`)); } });
     el('edit-post-btn').addEventListener('click', async () => { if(!activeDropdownPostId) return; const snap = await get(ref(db, `posts/${activeDropdownPostId}`)); if(!snap.exists()) return; editPostId = activeDropdownPostId; el('post-modal-title').textContent = 'Edit Post Caption'; el('post-upload-section').style.display = 'none'; el('post-caption').value = snap.val().caption || ""; el('post-modal').classList.add('active'); });
@@ -1222,7 +1341,10 @@
     el('send-comment-btn').addEventListener('click', async () => {
         const text = el('comment-input').value.trim(); if(!text) return;
         if(editCommentId) { await update(ref(db, `comments/${activePostId}/${editCommentId}`), { text: text }); } 
-        else { await push(ref(db, `comments/${activePostId}`), { postId: activePostId, userId: currentUser.uid, text: text, parentId: replyToCommentId || null, createdAt: Date.now() }); }
+        else { 
+            await push(ref(db, `comments/${activePostId}`), { postId: activePostId, userId: currentUser.uid, text: text, parentId: replyToCommentId || null, createdAt: Date.now() }); 
+            createNotification(activePostAuthorId, 'comment', currentUser.uid, activePostId, text);
+        }
         el('comment-input').value = ''; el('cancel-reply-btn').click();
     });
 
@@ -1234,7 +1356,11 @@
         const targetUid = indexSnap.val(); const blockSnap = await get(ref(db, `blocks/${targetUid}/${currentUser.uid}`)); if(blockSnap.exists() && blockSnap.val()) return res.innerHTML = '<span style="color:var(--danger)">Unable to send request to this user.</span>';
         const user = await getUserData(targetUid);
         res.innerHTML = `<div style="display:flex; align-items:center; gap:10px; justify-content:center; margin-top:10px;"><img src="${user.dpUrl || defaultAvatarSvg}" style="width:50px; height:50px; border-radius:50%; object-fit:cover;"><span>${renderNameWithBadge(user)}</span></div><button id="send-req-btn" style="margin-top:15px; width:auto; padding:10px 20px;">Send Request</button>`;
-        document.getElementById('send-req-btn').addEventListener('click', async () => { await set(ref(db, `requests/${targetUid}/${currentUser.uid}`), { timestamp: Date.now(), name: myProfile.name, dpUrl: myProfile.dpUrl }); res.innerHTML = '<span style="color:var(--success)">Request Sent!</span>'; });
+        document.getElementById('send-req-btn').addEventListener('click', async () => { 
+            await set(ref(db, `requests/${targetUid}/${currentUser.uid}`), { timestamp: Date.now(), name: myProfile.name, dpUrl: myProfile.dpUrl }); 
+            createNotification(targetUid, 'request', currentUser.uid);
+            res.innerHTML = '<span style="color:var(--success)">Request Sent!</span>'; 
+        });
     });
 
     function loadRequests() {
@@ -1282,7 +1408,7 @@
         el('chat-header-profile-trigger').onclick = () => showUserProfile(contact.uid);
         el('chat-user-dp').onclick = () => showUserProfile(contact.uid);
 
-        el('chat-screen').classList.add('active'); el('chat-messages').innerHTML = '<div class="typing-indicator" id="chat-typing-indicator">Typing...</div>'; await set(ref(db, `unreadCounts/${currentUser.uid}/${activeChatId}`), 0);
+        el('chat-screen').classList.add('active'); el('chat-messages').innerHTML = '<div class="typing-indicator" id="chat-typing-indicator" style="color: var(--text-secondary); font-size: 13px; padding: 5px;">Typing...</div>'; await set(ref(db, `unreadCounts/${currentUser.uid}/${activeChatId}`), 0);
         
         // Clear media
         el('chat-media-cancel-btn').click();
@@ -1402,7 +1528,7 @@
 
     el('chat-menu-btn').addEventListener('click', (e) => { e.stopPropagation(); const menu = el('chat-menu-dropdown'); menu.style.top = '60px'; menu.style.right = '15px'; menu.style.display = menu.style.display === 'block' ? 'none' : 'block'; });
     
-    el('clear-chat-btn').addEventListener('click', async () => { if(!activeChatId) return; await set(ref(db, `userChats/${currentUser.uid}/${activeChatId}/clearedAt`), serverTimestamp()); el('chat-messages').innerHTML = '<div class="typing-indicator" id="chat-typing-indicator">Typing...</div>'; });
+    el('clear-chat-btn').addEventListener('click', async () => { if(!activeChatId) return; await set(ref(db, `userChats/${currentUser.uid}/${activeChatId}/clearedAt`), serverTimestamp()); el('chat-messages').innerHTML = '<div class="typing-indicator" id="chat-typing-indicator" style="color: var(--text-secondary); font-size: 13px; padding: 5px;">Typing...</div>'; });
     
     el('delete-chat-btn').addEventListener('click', async () => {
         if(!activeChatContactId) return;
@@ -1574,6 +1700,18 @@
     function dragStart(e) { if (e.type === "touchstart") { initialX = e.touches[0].clientX - xOffset; initialY = e.touches[0].clientY - yOffset; } else { initialX = e.clientX - xOffset; initialY = e.clientY - yOffset; } if (e.target === dragItem || e.target.parentNode === dragItem || e.target.parentNode?.parentNode === dragItem) active = true; }
     function dragEnd() { initialX = currentX; initialY = currentY; active = false; }
     function drag(e) { if (active) { e.preventDefault(); if (e.type === "touchmove") { currentX = e.touches[0].clientX - initialX; currentY = e.touches[0].clientY - initialY; } else { currentX = e.clientX - initialX; currentY = e.clientY - initialY; } xOffset = currentX; yOffset = currentY; dragItem.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`; } }
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/Whistachat1/service-worker.js')
+  .then(function(registration) {
+    console.log('Service Worker registered:', registration);
+  })
+  .catch(function(error) {
+    console.log('Service Worker registration failed:', error);
+  });
+}
 </script>
 </body>
 </html>
